@@ -29,6 +29,13 @@ distance_set, partition_set = SingleLinkagePartitions.runsinglelinkage(
     early_stop_distance = 5.023150248368374,
 )
 
+# this should be X.
+Z0 = SingleLinkagePartitions.instantiatepartition(partition_set[begin], X)
+
+# this should be the singleton partition.
+Z_end = SingleLinkagePartitions.instantiatepartition(partition_set[end], X)
+
+
 # Use single linkage to merge points.
 #distance_threshold = 1.0
 Y, status_flag = SingleLinkagePartitions.mergepoints(X, metricfunc; tol = distance_threshold)

@@ -114,3 +114,20 @@ function checktoptriangle(K::Matrix{T}, lb::T)::Bool where T
 
     return status_flag
 end
+
+#### utilities
+
+function instantiatepartition(
+    partition::Vector{Vector{Int}},
+    X::Vector{Vector{T}},
+    ) where T
+
+    N_parts = length(partition)
+    partition_X = Vector{Vector{Vector{T}}}(undef, N_parts)
+    for k in eachindex(partition_X)
+        
+        partition_X[k] = X[partition[k]]
+    end
+
+    return partition_X
+end

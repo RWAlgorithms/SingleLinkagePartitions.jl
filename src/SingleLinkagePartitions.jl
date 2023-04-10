@@ -5,6 +5,7 @@ include("front_end.jl")
 
 export runsinglelinkage,
     mergepoints,
-    getdistances
+    getdistances,
+    instantiatepartition
 
 end # module SingleLinkagePartitions
