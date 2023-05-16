@@ -16,6 +16,26 @@ function mergepoints(
     tol = 1e-6,
     )::Tuple{Vector{Vector{T}},Bool} where T
 
+Same as mergepointfull(), except only returns the first two return variables from mergepointfull().
+"""
+function mergepoints(
+    X::Vector{Vector{T}},
+    metricfunc::Function;
+    tol = 1e-6,
+    )::Tuple{Vector{Vector{T}},Bool} where T
+
+    Y, tol_satisfied, _ = mergepointsfull(X, metricfunc; tol = tol)
+    
+    return Y, tol_satisfied
+end
+
+"""
+function mergepointsfull(
+    X::Vector{Vector{T}},
+    metricfunc::Function;
+    tol = 1e-6,
+    )::Tuple{Vector{Vector{T}},Bool, Vector{Vector{Vector{Int}}}, Vector{T}, Int} where T
+
 Inputs:
 - `X` is the set of points to be merged. This algorithm assumes the points are unique.
 
@@ -28,12 +48,21 @@ Outputs:
 - `Y` is the set of merged points.
 
 - `status_flag` indicates whether the pair-wise distances in `Y` are all smaller than `tol`.
+
+- `partitioned_set_sorted` is the set of candidate partitions of `X` for creating `Y`.
+
+- `h_set_sorted` is the corresponding set of single linkage distances to the partitions in `partitioned_set_sorted`.
+
+- `chosen_ind` is the index with respect to `partitioned_set_sorted` and `h_set_sorted` that was selected to create `Y`.
+
+Description:
+`Y` is the output of `fuseparts(partitioned_set_sorted[chosen_ind])`.
 """
-function mergepoints(
+function mergepointsfull(
     X::Vector{Vector{T}},
     metricfunc::Function;
     tol = 1e-6,
-    )::Tuple{Vector{Vector{T}},Bool} where T
+    )::Tuple{Vector{Vector{T}},Bool, Vector{Vector{Vector{Int}}}, Vector{T}, Int} where T
 
     @assert tol > zero(T)
 
@@ -64,13 +93,23 @@ function mergepoints(
         ind -= 1
     end
     
-    return Y, tol_satisfied
+    return Y, tol_satisfied, partitioned_set_sorted, h_set_sorted, ind+1
 end
 
+
+"""
+fuseparts(
+    partition::Vector{Vector{Int}},
+    X::Vector{Vector{T}},
+    )::Vector{Vector{T}} where T
+
+Description:
+A point in the output `Y` is assigned to be the averaging of the points in a part from `partition`, which is a partition of `X`.
+"""
 function fuseparts(
     partition::Vector{Vector{Int}},
     X::Vector{Vector{T}},
-    ) where T
+    )::Vector{Vector{T}} where T
 
     N_parts = length(partition)
     Y = Vector{Vector{T}}(undef, N_parts)
@@ -90,6 +129,16 @@ end
 
 ########## routines for testing.
 
+"""
+getdistances(X::Vector{Vector{T}}, metricfunc) where T
+
+Description:
+Pair-wise distance of the points in `X`, with respect to the metric in `metricfunc`.
+An example of metricfunc is:
+```
+metricfunc = (xx,yy)->norm(xx-yy)
+```
+"""
 function getdistances(X::Vector{Vector{T}}, metricfunc) where T
     
     K = zeros(T, length(X), length(X))
@@ -117,10 +166,20 @@ end
 
 #### utilities
 
+"""
+instantiatepartition(
+    partition::Vector{Vector{Int}},
+    X::Vector{Vector{T}},
+    )::Vector{Vector{Vector{T}}} where T
+
+Description:
+`partition` is a partition of `X` in terms of indices, which uses less storage than storing it in terms of the contents of `X`.
+This function returns a partition of `X` in terms of points that corresponds to `partition`.
+"""
 function instantiatepartition(
     partition::Vector{Vector{Int}},
     X::Vector{Vector{T}},
-    ) where T
+    )::Vector{Vector{Vector{T}}} where T
 
     N_parts = length(partition)
     partition_X = Vector{Vector{Vector{T}}}(undef, N_parts)

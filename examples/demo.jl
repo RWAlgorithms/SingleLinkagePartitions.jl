@@ -41,6 +41,10 @@ Z_end = SingleLinkagePartitions.instantiatepartition(partition_set[end], X)
 Y, status_flag = SingleLinkagePartitions.mergepoints(X, metricfunc; tol = distance_threshold)
 @show status_flag
 
+Y2, status_flag2, partitioned_set_sorted, h_set_sorted, chosen_ind = SingleLinkagePartitions.mergepointsfull(X, metricfunc; tol = distance_threshold)
+Y3 = SingleLinkagePartitions.fuseparts(partitioned_set_sorted[chosen_ind], X)
+@show norm(Y2-Y), norm(Y3-Y) # should be zero if merpointsfull() is working.
+
 # Test
 # the elements of a partition is called a part. Some call it a cluster, if they call the set X the data set.
 # the non-zero entries/parts in dists_X that are less than `distance_threshold` are combined into the same parts.

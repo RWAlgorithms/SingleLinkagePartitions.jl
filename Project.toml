@@ -1,7 +1,7 @@
 name = "SingleLinkagePartitions"
 uuid = "f8439c9b-f421-4171-88a6-2fea72ebf919"
 authors = ["Roy Wang"]
-version = "1.1.0"
+version = "1.2.0"
 
 [compat]
 julia = "1"
