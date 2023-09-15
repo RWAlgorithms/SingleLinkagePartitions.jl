@@ -5,6 +5,7 @@ using Test
 using LinearAlgebra
 
 import SingleLinkagePartitions
+import Statistics
 
 # # utility functions
 
@@ -58,6 +59,20 @@ import SingleLinkagePartitions
         status_flag2 = SingleLinkagePartitions.checktoptriangle(dists_Y, distance_threshold)
         @test status_flag2 == status_flag
     end
+end
 
+@testset "devectorized computemean()" begin
 
+    SL = SingleLinkagePartitions
+    D = 79
+    N_pts = 100
+    N_tests = 2000
+
+    tol = 1e-12
+
+    for _ = 1:N_tests
+        X = collect( randn(D) for _ = 1:N_pts )
+        
+        @test norm(Statistics.mean(X) - SL.computemean(X)) < tol
+    end
 end
