@@ -98,3 +98,19 @@ true
 ```
 
 If `mergepoints()` returns a `false` value for `status_flag`, then an unexpected error occured, and the pair-wise distances (as computed by `metricfunc`) returned merged points `Y` are not all smaller than `tol`.
+
+## Search for partition less than a specified size
+You can also do merge point that yields a partition less than a specified size.
+
+```julia
+f_X = randn(length(X))
+Y, W, status_flag = SingleLinkagePartitions.mergepoints(
+    SingleLinkagePartitions.UpperboundParts(9, Inf),
+    X,
+    f_X,
+    metricfunc,
+)
+@show length(Y) # this should be less than 9.
+@show length(W) # this should be less than 9.
+```
+The secon the second input of `UpperboundParts()` is the early stopping distance of the single linkage partition tree construction algorithm. We passed in `Inf` to mean we want to construct the entire tree, and search it for the largest partition that has less than `9` parts.
