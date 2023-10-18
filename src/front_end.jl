@@ -35,7 +35,7 @@ end
 abstract type MergeOption end
 
 struct UpperboundDistance{T <: AbstractFloat} <: MergeOption
-    max_dist::T # pick the partition or just (strictly) below to this distance.
+    max_dist::T # pick the partition just (strictly) below to this distance.
 end
 
 function getstoppingdist(A::UpperboundDistance)
@@ -43,7 +43,7 @@ function getstoppingdist(A::UpperboundDistance)
 end
 
 struct UpperboundParts{T <: AbstractFloat} <: MergeOption
-    N_max::Int # pick the partition  or just (strictly) below to this number of parts.
+    N_max::Int # pick the partition just (strictly) below to this number of parts.
     early_stopping_dist::T
 end
 
