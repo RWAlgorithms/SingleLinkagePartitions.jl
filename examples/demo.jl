@@ -1,11 +1,11 @@
 
-using LinearAlgebra
+#using LinearAlgebra
 
 import Random
 Random.seed!(25)
 
-import SingleLinkagePartitions
-SL = SingleLinkagePartitions
+# import SingleLinkagePartitions
+# SL = SingleLinkagePartitions
 
 include("./helpers/utils.jl") # replace routines in core.jl with this.
 
@@ -53,5 +53,33 @@ Xr, yr, partition = SL.reducepoints(
     y,
     SL.EuclideanSquared(),
 )
+
+
+### test if we have defenerate points.
+
+D = 3
+tmp = randn(T, D)
+N = 10
+X_degen = collect( tmp for _ = 1:N )
+X_degen[1] = randn(T, D)
+X_degen[2] = randn(T, D)
+y = randn(T, N)
+
+Xr, yr, partition = SL.reducepoints(
+    SL.UseMinimum(),
+    8,
+    X_degen,
+    y,
+    SL.EuclideanSquared(),
+)
+
+
+# for merging points, but on a target size, 8 in this example.
+Xm, partition_merged = SL.averagepoints(
+    8,
+    X,
+    SL.EuclideanSquared()
+)
+ym = SL.averagepoints(y, partition_merged)
 
 nothing
