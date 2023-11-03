@@ -14,6 +14,10 @@ function reducepoints(
     early_stop_distance = convert(T, Inf),
     ) where T
 
+    @assert length(X) == length(y)
+    @assert k > 0
+    k = min(k, length(X))
+
     _, partition_set = runsinglelinkage(
         X,
         metric;

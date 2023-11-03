@@ -31,6 +31,7 @@ export runsinglelinkage,
     mergepointsfull,
     getdistances,
     instantiatepartition,
-    fuseparts
+    fuseparts,
+    reducepoints
 
 end # module SingleLinkagePartitions
