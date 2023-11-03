@@ -91,7 +91,7 @@ end
 
 #### the new mergepoints.
 
-function reducepoints(
+function averagepoints(
     k::Int,
     X::Vector{Vector{T}},
     metric::MetricType;
