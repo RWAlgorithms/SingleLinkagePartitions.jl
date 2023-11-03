@@ -43,70 +43,15 @@ Z_end = SL.instantiatepartition(partition_set[end], X)
 Y, status_flag = SL.mergepoints(X, metricfunc; tol = distance_threshold)
 @show status_flag
 
-# Test
-# the elements of a partition is called a part. Some call it a cluster, if they call the set X the data set.
-# the non-zero entries/parts in dists_X that are less than `distance_threshold` are combined into the same parts.
-dists_X = SL.getdistances(X, metricfunc)
+# # Reduce points to only k points, by keeping the minimum instead of merging them.
 
-# therefore, the non-zero entries of dists_Y should all be greater or equal to distance_threshold.
-dists_Y = SL.getdistances(Y, metricfunc)
-
-println("if true, then Y = X, i.e. we have all singleton parts, i.e. X = Y. otherwise this should be false.")
-@show SL.checktoptriangle(dists_X, distance_threshold)
-println()
-
-println("Should be true: ")
-@show SL.checktoptriangle(dists_Y, distance_threshold)
-println()
-
-function checktoptriangle2(K::Matrix{T}, lb::T)::Bool where T
-
-    S = K .> lb
-    for i in axes(S,1)
-        S[i,i] = true
-    end
-
-    return all(S)
-end
-
-@show checktoptriangle2(dists_Y, distance_threshold)
-
-
-# # Test merging paired data.
-# some other dataset that has the same size as X, same point dimension for each element.
-f_X = collect( randn() for m in eachindex(X))
-
-YX, Yf_X, status_flag = SL.mergepoints(X, f_X, metricfunc; tol = distance_threshold)
-@show status_flag
-
-# the entries for X vs. YX that remain the same should also be the same entries that remain the same between f_X vs. Yf_X.
-# automate this test later.
-display(X)
-display(f_X)
-
-display(YX)
-display(Yf_X)
-
-
-
-# # merge points by a maximum.
-# Y6, status_flag6 = SL.mergepoints(
-#     SL.UpperboundParts(6, Inf),
-#     X,
-#     metricfunc,
-# )
-# @show status_flag6
-# @assert length(Y6) < 6
-
-# merge points by a maximum.
-Y6, Yf_X6, status_flag6 = SL.mergepoints(
-    SL.UpperboundParts(6, Inf),
+y = randn(T, length(X))
+Xr, yr, partition = SL.reducepoints(
+    SL.UseMinimum(),
+    8,
     X,
-    f_X,
-    metricfunc,
+    y,
+    SL.EuclideanSquared(),
 )
-@show status_flag6
-@assert length(Y6) < 6
-@assert length(Yf_X6) < 6
 
 nothing

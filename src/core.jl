@@ -47,13 +47,13 @@ struct DistanceContainer{T}
     #cols::Vector{Int} # j := cols[k] is the col index for the k-th part in the current partition.
 end
 
-function DistanceContainer(X::Vector{Vector{T}}, metricfunc::Function)::DistanceContainer{T} where T
+function DistanceContainer(X::Vector{Vector{T}}, metric::MetricType)::DistanceContainer{T} where T
 
     N = length(X)
     A = Matrix{T}(undef, N,N)
     for i2 in axes(A, 2)
         for i1 in axes(A, 1)
-            A[i1,i2] = metricfunc(X[i1], X[i2])
+            A[i1,i2] = evalmetric(metric, X[i1], X[i2])
         end
     end
 
@@ -171,10 +171,20 @@ function mergeparts!(
     return nothing
 end
 
-"""
+# for compatibility with legacy code.
 function runsinglelinkage(
     X::Vector{Vector{T}},
     metricfunc::Function;
+    early_stop_distance = convert(T, Inf), # default to solve for all possible levels.
+    )::Tuple{Vector{T},Vector{Vector{Vector{Int}}}} where T
+
+    return runsinglelinkage(X, GeneralMetric(metricfunc); early_stop_distance = early_stop_distance)
+end
+
+"""
+function runsinglelinkage(
+    X::Vector{Vector{T}},
+    metric::MetricType;
     early_stop_distance = Inf, # default to solve for all possible levels.
     )::Tuple{Vector{T},Vector{Vector{Vector{Int}}}} where T
 
@@ -186,7 +196,7 @@ We use the terminology `part` for an element of a partition.
 Inputs:
 - `X` is the set of points to be merged. This algorithm assumes the points are unique.
 
-- `metricfunc` is the metric function used to compute the distance between two points.
+- `metric` is the metric function used to compute the distance between two points.
 
 - `early_stop_distance`: `runsinglelinkage()` terminates early when the minimum pair-wise distance of the current partition is less than `early_stop_distance`.
 Setting `early_stop_distance = Inf` tells `runsinglelinkage()` to keep building partitions until the current partition has only one part, which contains all the points in `X`.
@@ -200,9 +210,8 @@ Outputs:
 """
 function runsinglelinkage(
     X::Vector{Vector{T}},
-    metricfunc::Function;
-    early_stop_distance = Inf, # default to solve for all possible levels.
-    #store_trait::StoreTrait
+    metric::MetricType;
+    early_stop_distance = convert(T, Inf), # default to solve for all possible levels.
     )::Tuple{Vector{T},Vector{Vector{Vector{Int}}}} where T
 
     # set up dendrogram.
@@ -215,7 +224,7 @@ function runsinglelinkage(
     #diagnostics = Vector{LevelDiagnostics}(undef, 0)
 
     # intermediates.
-    R = DistanceContainer(X, metricfunc)
+    R = DistanceContainer(X, metric)
 
     # subsequent levels.
     #new_part_ind = length(X) # we only merge two parts at each level, so only one new partition index per level.
