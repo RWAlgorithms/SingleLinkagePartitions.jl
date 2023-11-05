@@ -82,4 +82,16 @@ Xm, partition_merged = SL.averagepoints(
 )
 ym = SL.averagepoints(y, partition_merged)
 
+
+# could return a smaller size than 8 if the input X has non-distinct points.
+# the returned Xm will have distinct elements (up to zero_tol).
+Xm, partition_merged = SL.averagepoints(
+    8,
+    X_degen,
+    SL.EuclideanSquared();
+    zero_tol = eps(T)*100,
+)
+ym = SL.averagepoints(y, partition_merged)
+
+
 nothing
