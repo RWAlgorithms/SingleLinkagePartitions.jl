@@ -120,7 +120,7 @@ function averagepoints(
         ind_1st_unique = length(partition_set)
         result = findfirst(xx->xx>zero_tol, distance_set)
         if !isnothing(result)
-            ind_1st_unique = result
+            ind_1st_unique = result -1 # -1 since distance_set[begin] is always 0.
         end
 
         ind = length(partition_set) - k + 1
