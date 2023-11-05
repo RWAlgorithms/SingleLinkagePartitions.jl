@@ -93,5 +93,6 @@ Xm, partition_merged = SL.averagepoints(
 )
 ym = SL.averagepoints(y, partition_merged)
 
+@show SL.getdistances(Xm)
 
 nothing

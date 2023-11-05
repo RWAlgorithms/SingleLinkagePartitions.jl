@@ -346,6 +346,27 @@ function getdistances(X::Vector{Vector{T}}, metricfunc) where T
     return K
 end
 
+# for diagnostics.
+function getdistances(X::Vector{Vector{T}}) where T
+    
+    N = length(X)
+    M = div(N*(N-1), 2)
+    A = zeros(T, M)
+    inds = Vector{Tuple{Int,Int}}(undef, M)
+
+    k = 0
+    for j = 2:N
+        for i = 1:j-1 
+            k += 1
+            A[k] = norm(X[i]-X[j])
+            inds[k] = (i,j)
+        end
+    end
+
+    return A, inds
+end
+
+
 function checktoptriangle(K::Matrix{T}, lb::T)::Bool where T
 
     status_flag = true
