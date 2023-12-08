@@ -3,6 +3,8 @@ module SingleLinkagePartitions
 
 using LinearAlgebra
 using Statistics
+import Graphs
+import Distances
 
 function forcepositive(x::Float32)::Float32
     return clamp(x, 0.0f0, Inf32)
@@ -17,21 +19,26 @@ function forcepositive(x::Type{T})::T where T <: AbstractFloat
 end
 
 include("metrics.jl")
+include("mst.jl")
 
-#include("utils.jl")  # TODO add convinence method so that built-in distance metrics like the ones in utils.jl can be used. Also allow users to wrap function in a custom struct type for custom emtricfuncs.
+include("reduce.jl")
 
-include("core.jl")
-include("consolidate.jl")
-# TODO clean up the interface for mergepoints() and impleemnt efficint algorithms for merge points.
+export UseSLDistance,
+    UseCumulativeSLDistance,
 
-include("front_end.jl")
+    UseImportance,
+    UseProximitytoMean,
+    UseMean,
 
-export runsinglelinkage,
-    mergepoints,
-    mergepointsfull,
-    getdistances,
-    instantiatepartition,
-    fuseparts,
-    reducepoints
+    DistancesjlMetric,
+    #InnerProductNorm,
+    #GeneralMetric,
+    geteuclideanmetric,
+
+    reducepts,
+    computesl,
+    getpartition,
+    getpairwisedists,
+    getpairwisedists!
 
 end # module SingleLinkagePartitions
