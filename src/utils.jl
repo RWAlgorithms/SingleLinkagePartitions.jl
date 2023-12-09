@@ -17,7 +17,9 @@ function binarysearch(
         p = (lb+ub)/2
         f_p = f(p)
 
-        if isapprox(f_p, target_score; atol = atol)
+        if isapprox(f_p, target_score; atol = atol) || # found solution.
+            isapprox(lb, ub; atol = atol) # we're stuck.
+
             return p, iter
         end
 
@@ -77,9 +79,13 @@ struct UseMaxDeviation{T <: AbstractFloat} <: LevelOption
 end
 
 function UseMaxDeviation(max_dev::T)::UseMaxDeviation{T} where T <: AbstractFloat
+    return UseMaxDeviation(max_dev, false)
+end
+
+function UseMaxDeviation(max_dev::T, verbose::Bool)::UseMaxDeviation{T} where T <: AbstractFloat
     @assert max_dev >= zero(T) # if zero, getlevel() should return 0.
     # if max_dev is some large number that exceeds maximum(pt.w), then getlevel() should return getNedges(pt)
-    return UseMaxDeviation(max_dev, 100, max_dev/100, true)
+    return UseMaxDeviation(max_dev, 100, max_dev/100, verbose)
 end
 
 
