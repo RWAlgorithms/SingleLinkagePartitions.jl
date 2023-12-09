@@ -1,7 +1,7 @@
 name = "SingleLinkagePartitions"
 uuid = "f8439c9b-f421-4171-88a6-2fea72ebf919"
 authors = ["Roy Chih Chung Wang"]
-version = "2.0.2"
+version = "2.0.3"
 
 [deps]
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"

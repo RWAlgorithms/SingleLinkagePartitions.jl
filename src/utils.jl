@@ -164,6 +164,15 @@ function iteratedsl(
 
     for iters = 1:max_iter
 
+        if isempty(X)
+            return P, iters
+        end
+
+        if length(X) == 1
+            push!(P, [X_labels[begin];] )
+            return P, iters
+        end
+
         # compute partition tree.
         pt = computesl(metric, X)
         level = getlevel(level_config, pt, X)
@@ -200,6 +209,7 @@ function iteratedsl(
         # update output partition, P.
         translatepartition!(partition, X_labels)
         append!(P, partition[update_inds])
+        @show P
 
         # prepare next iteration's input, X.
         X = X[next_X_inds]
