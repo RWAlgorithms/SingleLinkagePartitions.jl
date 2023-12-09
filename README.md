@@ -8,7 +8,7 @@ Thanks to Dr. Veronika Strnadova-Neeley for her online notes on this topic.
 import Random
 Random.seed!(25)
 
-import SingleLinkagePartitions
+import SingleLinkagePartitions as SL
 using LinearAlgebra
 
 T = Float64
@@ -39,7 +39,7 @@ metric = SL.geteuclideanmetric()
 pt = SL.computesl(metric, X)
 
 distances_set = SL.getdistances(pt)
-partitions_set = SL.getallpartitions(pt)
+partition_set = SL.generateallpartitions(pt)
 ```
 
 The output:
@@ -79,8 +79,8 @@ We can use single-linkage partition tree to combine a set of points `X` in a par
 Each part in the selected partition, `partition_r`, generates a point in the output reduced point set `Xc`, and estimated variance `vs`. `center_trait` determines how we create a representative point given the points in a part, and we do this for each part in the partition to get the reduced point set.
 
 ```julia
-
-level_trait = SL.UseSLDistance() # `atol` is compared aaginst`distance_set to pick a level.
+atol = convert(T, 1.0)
+level_trait = SL.UseSLDistance(atol) # `atol` is compared aaginst`distance_set to pick a level.
 
 # other trais.
 # level_trait = SL.UseCumulativeSLDistance() # atol is compared against cumsum(distance_set) to pick a level.
@@ -100,8 +100,6 @@ Xc, vs, partition_r = SL.reducepts(
     center_trait,
     metric,
     X,
-    atol;
-    zero_tol = eps(T)*100,
 )
 ```
 
@@ -115,7 +113,11 @@ Xc, vs_X, yc, vs_y, partition_r = SL.reducepts(
     metric,
     X,
     y,
-    atol,
 )
 
+```
+
+For each part in a given parition, we can also get the maximum magnitude deviation from the mean for each dimension.
+```julia
+ds_X = SL.getmaxdeviations(X, partition_r)
 ```

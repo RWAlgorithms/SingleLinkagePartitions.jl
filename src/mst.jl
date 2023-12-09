@@ -142,4 +142,3 @@ function getpartition(pt::PartitionTree, level::Integer)::Vector{Vector{Int}}
     partition = Graphs.connected_components(g)
     return partition
 end
-

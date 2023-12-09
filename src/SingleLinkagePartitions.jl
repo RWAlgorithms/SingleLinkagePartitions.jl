@@ -22,6 +22,7 @@ include("metrics.jl")
 include("mst.jl")
 
 include("reduce.jl")
+include("utils.jl")
 
 export UseSLDistance,
     UseCumulativeSLDistance,

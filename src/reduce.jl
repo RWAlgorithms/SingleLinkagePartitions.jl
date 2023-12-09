@@ -1,27 +1,45 @@
 
 ## how we determine which level (i.e., which partition) given a tolerance.
 abstract type LevelOption end
-struct UseCumulativeSLDistance <: LevelOption end # the output should have a lower minimum pair-wise distance than atol, but might have give different results when the input set X is permutated.
-struct UseSLDistance <: LevelOption end # better consistency of algorithm, but the output might have a minimum pair-wise distance larger than the given atol.
 
-function getlevel(::UseSLDistance, w::Vector{T}, atol::T)::Int where T <: AbstractFloat
+# the output should have a lower minimum pair-wise distance than atol, but might have give different results when the input set X is permutated.
+struct UseCumulativeSLDistance{T} <: LevelOption
+    atol::T
+end
+
+# better consistency of algorithm, but the output might have a minimum pair-wise distance larger than the given atol.
+struct UseSLDistance{T} <: LevelOption
+    atol::T
+end
+
+function getlevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
     
-    ind = findfirst(xx->xx>atol, w)
+    w = pt.w
+    
+    ind = findfirst(xx->xx>C.atol, w)
     level = length(w)
     if !isnothing(ind)
         level = ind
     end
+
+    level -= 1
+    level = clamp(level, 0, getNedges(pt))
 
     return level
 end
 
-function getlevel(::UseCumulativeSLDistance, w::Vector{T}, atol::T)::Int where T <: AbstractFloat
+function getlevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
     
-    ind = findfirst(xx->xx>atol, cumsum(w))
+    w = pt.w
+    
+    ind = findfirst(xx->xx>C.atol, cumsum(w))
     level = length(w)
     if !isnothing(ind)
         level = ind
     end
+
+    level -= 1
+    level = clamp(level, 0, getNedges(pt))
 
     return level
 end
@@ -100,13 +118,13 @@ function getcenters(
 end
 
 function pickrepresentation(C::UseScore{T,UseMaximum}, part) where T
-    _, part_ind = findmax( C.w[n] for n in part )
+    _, part_ind = findmax( C.score[n] for n in part )
     
     return part_ind
 end
 
 function pickrepresentation(C::UseScore{T,UseMinimum}, part) where T
-    _, part_ind = findmin( C.w[n] for n in part )
+    _, part_ind = findmin( C.score[n] for n in part )
     
     return part_ind
 end
@@ -128,6 +146,28 @@ function getvariances(
         for d = 1:D
             itr = (X[n][d] for n in partition[k])
             vs[k] += Statistics.var(itr; corrected = false)
+        end
+    end
+
+    return vs
+end
+
+# each dimension gets its own variance estimate.
+function getseparatevariances(
+    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+    partition::Vector{Vector{Int}},
+    )::Vector{Vector{T}} where T <: AbstractFloat
+
+    @assert !isempty(X)
+    D = length(X[begin])
+
+    vs = Vector{Vector{T}}(undef, length(partition))
+    for k in eachindex(partition)
+
+        vs[k] = zeros(T, D)
+        for d = 1:D
+            itr = (X[n][d] for n in partition[k])
+            vs[k][d] = Statistics.var(itr; corrected = false)
         end
     end
 
@@ -158,30 +198,11 @@ end
 function getreduceptspartition(
     level_trait::LevelOption,
     metric::MetricType,
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}};
-    atol::T = convert(T, 1e-4),
-    zero_tol::T = eps(T)*100,
+    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
     )::Vector{Vector{Int}} where T <: AbstractFloat
 
     pt = computesl(metric, X)
-
-    # decide which level to use.
-    w = pt.w
-
-    # in case there are duplicate points in X.
-    level1 = getlevel(UseSLDistance(), w, zero_tol)
-
-    # the actual approximation. based on triangular ineequality for Euclidean norm.
-    level2 = getlevel(level_trait, w, atol)
-
-    level_plus_1 = max(level1, level2)
-
-    level = level_plus_1 - 1
-    level = clamp(level, 0, getNedges(pt))
-
-    #@show level1, level2, level, level_plus_1 # debug.
-
-    # combine points.
+    level = getlevel(level_trait, pt, X)
     partition = getpartition(pt, level)
 
     return partition
@@ -195,11 +216,9 @@ function reducepts(
     center_trait::PartRepOption,
     metric::MetricType,
     X::Vector{Vector{XT}},
-    atol::T;
-    zero_tol::T = eps(T)*100,
-    ) where {T <: AbstractFloat, XT <: Number}
+    ) where XT <: Number
     
-    partition = getreduceptspartition(level_trait, metric, X; atol = atol, zero_tol = zero_tol)
+    partition = getreduceptspartition(level_trait, metric, X)
 
     centers = getcenters(center_trait, X, partition)
     variances = getvariances(X, partition)
@@ -207,7 +226,7 @@ function reducepts(
     return centers, variances, partition
 end
 
-# we also reduce y.
+# the version that also also reduces y.
 # usage: reducing training set of scalar-valued (X, y) regression data.
 function reducepts(
     level_trait::LevelOption,
@@ -215,11 +234,9 @@ function reducepts(
     metric::MetricType,
     X::Vector{Vector{XT}},
     y::Vector{YT},
-    atol::T;
-    zero_tol::T = eps(T)*100,
-    ) where {T <: AbstractFloat, XT <: Number, YT <: Number}
+    ) where {XT <: Number, YT <: Number}
     
-    partition = getreduceptspartition(level_trait, metric, X; atol = atol, zero_tol = zero_tol)
+    partition = getreduceptspartition(level_trait, metric, X)
 
     Xc = getcenters(center_trait, X, partition)
     Xv = getvariances(X, partition)
@@ -237,11 +254,9 @@ function reducepts(
     metric::MetricType,
     X::Vector{Vector{XT}},
     y_set::Vector{Vector{YT}},
-    atol::T;
-    zero_tol::T = eps(T)*100,
-    ) where {T <: AbstractFloat, XT <: Number, YT <: Number}
+    ) where {XT <: Number, YT <: Number}
     
-    partition = getreduceptspartition(level_trait, metric, X; atol = atol, zero_tol = zero_tol)
+    partition = getreduceptspartition(level_trait, metric, X)
 
     Xc = getcenters(center_trait, X, partition)
     Xv = getvariances(X, partition)

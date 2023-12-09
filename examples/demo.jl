@@ -12,10 +12,6 @@ Random.seed!(25)
 #### singlet-linkage clustering.
 T = Float64
 
-# with non-unique values.
-X, ref_parts = deserialize("data/leucine700")
-@assert length(collect(Iterators.flatten(ref_parts))) == length(X)
-
 # from the README.md.
 X = [
     [-0.40243248293794137, 0.8540414903329187, -0.6651248667822778],
@@ -52,21 +48,25 @@ partition_set = SL.generateallpartitions(pt)
 
 #### reduce points.
 
-zero_tol = convert(T, eps(T)*100)
 atol = convert(T, 1e-4)
 
 
 score = rand(T, N)
 
 
-level_trait = SL.UseSLDistance()
+level_trait = SL.UseSLDistance(atol)
 
 center_trait = SL.UseScore(SL.UseMinimum(), score) # when Xc must be a subset of X
 center_trait = SL.UseProximitytoMean() # when Xc must be a subset of X
 center_trait = SL.UseMean() # when Xc can be any pt from which X is constructed from.
 
 
-Xc0, vs0, partition_r = SL.reducepts(level_trait, center_trait, metric, X, atol)
+Xc0, vs0, partition_r = SL.reducepts(
+    level_trait,
+    center_trait,
+    metric,
+    X,
+)
 
 y = randn(Complex{Float32}, N)
 Xc1, vs_X1, yc, vs_y, partition_r = SL.reducepts(
@@ -75,7 +75,6 @@ Xc1, vs_X1, yc, vs_y, partition_r = SL.reducepts(
     metric,
     X,
     y,
-    atol,
 )
 
 
@@ -86,7 +85,6 @@ Xc, vs_X, yc_set, vs_y_set, partition_r = SL.reducepts(
     metric,
     X,
     y_set,
-    atol,
 )
 
 
@@ -95,22 +93,5 @@ Xc, vs_X, yc_set, vs_y_set, partition_r = SL.reducepts(
 
 @assert norm(vs0 - vs_X1) < eps(T)*100
 @assert norm(vs_X - vs_X1) < eps(T)*100
-
-########### permutation test.
-
-
-level_trait = SL.UseSLDistance()
-level_trait = SL.UseCumulativeSLDistance()
-
-X0 = collect( randn(T, 3) for _ = 1:9 )
-X0 = collect( randn(T,3) .* atol/4 for _ = 1:1000 )
-Xc0, vs0, partition0 = SL.reducepts(level_trait, center_trait, metric, X0, atol)
-
-X1 = deepcopy(X0)
-X1[1], X[end] = X[end], X[1]
-Xc1, vs1, partition1 = SL.reducepts(level_trait, center_trait, metric, X0, atol)
-
-@show norm(sort(Xc0) - sort(Xc1))
-
 
 nothing
