@@ -209,7 +209,7 @@ function iteratedsl(
         # update output partition, P.
         translatepartition!(partition, X_labels)
         append!(P, partition[update_inds])
-        @show P
+        #@show P
 
         # prepare next iteration's input, X.
         X = X[next_X_inds]
