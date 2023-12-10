@@ -215,9 +215,13 @@ function reducepts(
     level_trait::LevelOption,
     center_trait::PartRepOption,
     metric::MetricType,
-    X::Vector{Vector{XT}},
-    ) where XT <: Number
+    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+    ) where T <: AbstractFloat
     
+    if length(X) == 1
+        return deepcopy(X), zeros(T, 1), collect( ones(Int,1) for _ = 1:1 )
+    end
+
     partition = getreduceptspartition(level_trait, metric, X)
 
     centers = getcenters(center_trait, X, partition)
@@ -232,10 +236,14 @@ function reducepts(
     level_trait::LevelOption,
     center_trait::PartRepOption,
     metric::MetricType,
-    X::Vector{Vector{XT}},
+    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
     y::Vector{YT},
-    ) where {XT <: Number, YT <: Number}
+    ) where {T <: AbstractFloat, YT <: Number}
     
+    if length(X) == 1
+        return deepcopy(X), zeros(T, 1), copy(y), zeros(T, 1), collect( ones(Int,1) for _ = 1:1 )
+    end
+
     partition = getreduceptspartition(level_trait, metric, X)
 
     Xc = getcenters(center_trait, X, partition)
@@ -252,10 +260,14 @@ function reducepts(
     level_trait::LevelOption,
     center_trait::PartRepOption,
     metric::MetricType,
-    X::Vector{Vector{XT}},
+    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
     y_set::Vector{Vector{YT}},
-    ) where {XT <: Number, YT <: Number}
+    ) where {T <: AbstractFloat, YT <: Number}
     
+    if length(X) == 1
+        return deepcopy(X), zeros(T, 1), deepcopy(y_set), collect( zeros(T, 1) for _ in eachindex(y_set) ), collect( ones(Int,1) for _ = 1:1 )
+    end
+
     partition = getreduceptspartition(level_trait, metric, X)
 
     Xc = getcenters(center_trait, X, partition)

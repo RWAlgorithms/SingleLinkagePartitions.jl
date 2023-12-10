@@ -55,8 +55,6 @@ function computesl(
     )::PartitionTree{T} where T <: AbstractFloat
 
     R = getpairwisedists(metric, X)
-    # R_flat, R_flat_inds = SL.getdistancesflat(R)
-    # #sorted_R = sort(R_flat)
 
     return PartitionTree(R)
 end
@@ -117,7 +115,10 @@ function getpartition(pt::PartitionTree, level::Integer)::Vector{Vector{Int}}
     max_level = getNedges(pt) # the root level.
 
     @assert 0 <= level <= max_level
-    @assert checkdatastructure(pt)
+    X_is_non_singleton = checkdatastructure(pt)
+    if !X_is_non_singleton
+        return collect( ones(Int, 1) for _ = 1:1 )
+    end
 
     # manually prepare the leaf and root levels to save computation.
     if level == 0

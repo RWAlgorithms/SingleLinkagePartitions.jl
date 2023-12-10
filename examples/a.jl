@@ -3,7 +3,6 @@ using LinearAlgebra
 import Statistics
 
 using Serialization
-using BenchmarkTools
 
 using Revise
 import SingleLinkagePartitions

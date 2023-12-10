@@ -26,6 +26,8 @@ X = [
     [1.2421363428579315, 0.47437350434528236, -0.5869506255304089],
 ]
 
+#X = X[1:1]
+
 #X = collect( ones(T, 4) for _ = 1:11) # identical set.
 
 #X = collect( ones(T, 4) for _ = 1:11) # identical but one.
@@ -40,11 +42,12 @@ N = length(X)
 metric = SL.geteuclideanmetric()
 pt = SL.computesl(metric, X)
 
-level = 2
+
+level = clamp(2, 1, SL.getNedges(pt)) # clamp in case X is a singleton set.
 partition = SL.getpartition(pt, level)
 
-distance_set = SL.getdistances(pt)
-partition_set = SL.generateallpartitions(pt)
+distance_set = SL.getdistances(pt) # length(distance_set) == length(X) - 1.
+partition_set = SL.generateallpartitions(pt) # length(partition_set) == length(X).
 
 #### reduce points.
 
