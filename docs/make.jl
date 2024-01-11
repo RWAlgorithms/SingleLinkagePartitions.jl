@@ -1,15 +1,33 @@
 using Documenter
 using SingleLinkagePartitions
 
+
+# # local.
 makedocs(
     sitename = "SingleLinkagePartitions",
-    format = Documenter.HTML(),
-    modules = [SingleLinkagePartitions]
+    modules = [SingleLinkagePartitions],
+    #format = Documenter.HTML(),
+    pages = [
+        "Overview" => "index.md",
+        "Public API" => "api.md",
+        "Demo: chaining & remedy" => "generated/chaining.md",
+    ],
 )
 
-# Documenter can also automatically deploy documentation to gh-pages.
-# See "Hosting Documentation" and deploydocs() in the Documenter manual
-# for more information.
-#=deploydocs(
-    repo = "<repository url>"
-)=#
+## github.
+# makedocs(
+#     sitename="SingleLinkagePartitions.jl",
+#     modules=[SingleLinkagePartitions],
+#     format=Documenter.HTML(prettyurls = get(ENV, "CI", nothing)=="true"),
+#     pages = [
+#         "Overview" => "index.md",
+#         "Public API" => "api.md",
+#         "Demo: image analysis" => "demo.md",
+#     ],
+# )
+# deploydocs(
+#     repo = "github.com/RoyCCWang/SingleLinkagePartitions.jl.git",
+#     target = "build",
+#     branch = "gh-pages",
+#     versions = ["stable" => "v^", "v#.#" ],
+# )

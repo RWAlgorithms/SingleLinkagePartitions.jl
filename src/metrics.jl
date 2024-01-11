@@ -5,6 +5,13 @@ struct DistancesjlMetric{DT} <: MetricType
     dist_metric::DT
 end
 
+"""
+```
+geteuclideanmetric()
+```
+Convinence constructor for a `DistancesjlMetric` type that SingleLinkagePartitions utilizes.
+returns DistancesjlMetric(Distances.Euclidean())
+"""
 function geteuclideanmetric()
     #return DistancesjlMetric(Distances.SqEuclidean())
     return DistancesjlMetric(Distances.Euclidean())

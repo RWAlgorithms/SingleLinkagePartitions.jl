@@ -22,24 +22,36 @@ include("metrics.jl")
 include("mst.jl")
 
 include("reduce.jl")
-include("utils.jl")
+include("iterated.jl")
 
-export UseSLDistance,
-    UseCumulativeSLDistance,
+include("frontend.jl")
+
+export getmaxlevel, #
 
     UseImportance,
     UseProximitytoMean,
     UseMean,
 
-    DistancesjlMetric,
+    #DistancesjlMetric,
     #InnerProductNorm,
     #GeneralMetric,
-    geteuclideanmetric,
+    geteuclideanmetric, #
+    UseMaxDeviation, #
+    UseSLDistance, #
+    UseCumulativeSLDistance,
+
+    picklevel, #
+    computemaxdeviation, #
+    iteratedsl, #
 
     reducepts,
-    computesl,
-    getpartition,
-    getpairwisedists,
-    getpairwisedists!
-
+    computesl, #
+    generateallpartitions, #
+    
+    #getpairwisedists,
+    #getpairwisedists!,
+    getpartition, #
+    getdistances, #
+    getlargestdistance #
+    
 end # module SingleLinkagePartitions

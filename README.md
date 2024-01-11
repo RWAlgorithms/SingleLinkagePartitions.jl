@@ -119,5 +119,8 @@ Xc, vs_X, yc, vs_y, partition_r = SL.reducepts(
 
 For each part in a given parition, we can also get the maximum magnitude deviation from the mean for each dimension.
 ```julia
-ds_X = SL.getmaxdeviations(X, partition_r)
+ds_X = SL.computedeviationdims(X, partition_r)
 ```
+
+# Citation
+You can use the *Cite This Repository* button below the *About* section on the GitHub webpage of this repository.

@@ -42,8 +42,8 @@ N = length(X)
 metric = SL.geteuclideanmetric()
 pt = SL.computesl(metric, X)
 
-
-level = clamp(2, 1, SL.getNedges(pt)) # clamp in case X is a singleton set.
+# level can be an integer from 0 to SL.getNedges(pt).
+level = 0 # leaf level, where every point in X is a part/cluster.
 partition = SL.getpartition(pt, level)
 
 distance_set = SL.getdistances(pt) # length(distance_set) == length(X) - 1.
@@ -80,7 +80,6 @@ Xc1, vs_X1, yc, vs_y, partition_r = SL.reducepts(
     y,
 )
 
-
 y_set = collect( randn(Complex{Float32}, N) for _ = 1:3 )
 Xc, vs_X, yc_set, vs_y_set, partition_r = SL.reducepts(
     level_trait,
@@ -98,3 +97,4 @@ Xc, vs_X, yc_set, vs_y_set, partition_r = SL.reducepts(
 @assert norm(vs_X - vs_X1) < eps(T)*100
 
 nothing
+

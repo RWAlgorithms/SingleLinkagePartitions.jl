@@ -2,17 +2,45 @@
 ## how we determine which level (i.e., which partition) given a tolerance.
 abstract type LevelOption end
 
-# the output should have a lower minimum pair-wise distance than atol, but might have give different results when the input set X is permutated.
+"""
+```
+struct UseCumulativeSLDistance{T} <: LevelOption
+    atol::T
+end
+```
+See `UseSLDistance` for a description on *merging distances*.
+
+`UseCumulativeSLDistance` specifies the threshold on the cumulative merging distance from level `0` to `l`. For use with `picklevel(`.
+"""
 struct UseCumulativeSLDistance{T} <: LevelOption
     atol::T
 end
 
-# better consistency of algorithm, but the output might have a minimum pair-wise distance larger than the given atol.
+"""
+```
+struct UseSLDistance{T} <: LevelOption
+    atol::T
+end
+```
+Terminology:
+The partitions of two consecutive levels in any partition tree `pt` is such that the larger level corresponds to a larger partition that contains the partition that corresponds to the smaller level.
+The part/cluster that merged as we traverse from level ``l`` to level ``l+1`` is the *merging distance* of the two levels.
+
+Description:
+`UseSLDistance` specifies the threshold merging distance of level `l` and `l+1`. For use with `picklevel(`.
+"""
 struct UseSLDistance{T} <: LevelOption
     atol::T
 end
 
-function getlevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
+"""
+```
+picklevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
+```
+See `UseSLDistance` for a description of *merging distance*.
+Returns the partition for first level `l-1` such that the merging distance between levels ``l`` and ``l-1`` is larger than the `C.atol` struct field. The search starts from ``l`` = 1, ``l-1`` = 0 (the leaf level). 
+"""
+function picklevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
     
     w = pt.w
     
@@ -28,7 +56,14 @@ function getlevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T 
     return level
 end
 
-function getlevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
+"""
+```
+picklevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
+```
+See `UseSLDistance` for a description of *merging distance*.
+Returns the partition for level `l-1` such that the cumulative sum of merging distances from the level ``0`` (the leaf level) to level ``l``is larger than the `C.atol` struct field. The search starts from ``l`` = 1, ``l-1`` = 0. 
+"""
+function picklevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
     
     w = pt.w
     
@@ -202,7 +237,7 @@ function getreduceptspartition(
     )::Vector{Vector{Int}} where T <: AbstractFloat
 
     pt = computesl(metric, X)
-    level = getlevel(level_trait, pt, X)
+    level = picklevel(level_trait, pt, X)
     partition = getpartition(pt, level)
 
     return partition

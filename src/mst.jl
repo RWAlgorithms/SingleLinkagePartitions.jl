@@ -7,13 +7,40 @@ struct PartitionTree{T <: AbstractFloat}
     # edges.
     src_nodes::Vector{Int}
     dest_nodes::Vector{Int}
-    w::Vector{T}
+    w::Vector{T} # merging distances.
 end
 
+"""
+```
+getdistances(pt::PartitionTree{T})::Vector{T} where T <: AbstractFloat
+```
+Returns the set of minimum distanes between consecutive nested partitions.
+If `pt` was constructed from `N` points, then there are `N-1` entries in the returned 1-D array of distances.
+"""
 function getdistances(pt::PartitionTree{T})::Vector{T} where T <: AbstractFloat
     return pt.w
 end
 
+"""
+```
+getlargestdistance(pt::PartitionTree{T})::Vector{T} where T <: AbstractFloat
+```
+Returns the largest merge/single-linkage distance.
+"""
+function getlargestdistance(pt::PartitionTree{T})::Vector{T} where T <: AbstractFloat
+    return pt.w[end] # sorted in ascending order.
+end
+
+"""
+```
+generateallpartitions(pt::PartitionTree)::Vector{Vector{Vector{Int}}}
+```
+returns the set of all partitions in the partition tree, `partition_set`
+If `N` points was used to generate the partition tree `pt`, then:
+- `partition_set` has `N+1` entries. Each entry is a partition.
+- Given the input point set that generated `pt`, call it `X::Vector{Vector{T}}`, a partition index 1 <= m <= N+1, part index k, part member index i, if we assign `z = partition_set[m][k][i]`, then `X[z]` is point that belongs to the m-th partition, k-th part/cluster in the partition, and it is the i-th point in that part/cluster.
+
+"""
 function generateallpartitions(pt::PartitionTree)
     return collect(
         getpartition(pt, level)
@@ -48,7 +75,18 @@ function PartitionTree(R::Matrix{T}) where T <: AbstractFloat
     return PartitionTree(size(R,1), src_nodes, dest_nodes, w_mst[inds])
 end
 
-# this is the front-end to single-linkage partition computation.
+"""
+```
+computesl(
+    metric::Union{DistancesjlMetric, InnerProductNorm},
+    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+    )::PartitionTree{T} where T <: AbstractFloat
+```
+Computes and returns the single-linkage partition tree of `X`, with respect to distance metric, `metric`.
+The partitions in the tree are specified by a *level* index from 0 to `maxlevel(pt)`, where `pt` is the returned `PartitionTree` variable.
+
+See `getpartition` to select a partition by its level from the return partition tree.
+"""
 function computesl(
     metric::Union{DistancesjlMetric, InnerProductNorm},
     X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
@@ -107,9 +145,19 @@ function findedge(mst, src::Integer, dest::Integer)
     )
 end
 
-# level 0 is the leaf level. level == length(mst) is the root level, where all nodes are in the singlton part.
-# level indicates the number of merges between two subgraphs, from the elaf level.
-#  the leaf level is 0.
+"""
+```
+getpartition(pt::PartitionTree, level::Integer)::Vector{Vector{Int}}
+```
+
+`level` indicates the number of merges that occured to produce a partition. Think of it as an index from 0 to `max_level = getmaxlevel(pt)`.
+
+We use the terminology *part* to mean an element (i.e. a subset) of a partition. Some folks call it a *cluster*.
+
+`level` == 0 corresponds to the leaf level where each point is assigned its own part (i.e. cluster), i.e., we have only singleton parts.
+
+The maximum level, `level` == `getmaxlevel(pt)`, corresponds to the root level where all points are assigned to be in the same part.
+"""
 function getpartition(pt::PartitionTree, level::Integer)::Vector{Vector{Int}}
 
     max_level = getNedges(pt) # the root level.

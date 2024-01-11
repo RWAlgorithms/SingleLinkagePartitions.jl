@@ -20,12 +20,12 @@ metric = SL.geteuclideanmetric()
 ###### option 1: single run of SL to get partition tree, then binary search the tree to get the partition that satisfies the max deviation from mean condition.
 
 pt = SL.computesl(metric, X) # get partition tree.
-level = SL.getlevel(level_config, pt, X) # pick level via binary search.
+level = SL.picklevel(level_config, pt, X) # pick level via binary search.
 partition = SL.getpartition(pt, level) # instantiate the partition given the level and tree.
 @show length(partition)
 
 # compute the maximum magnitude deviateion from the mean.
-ds_X0 = SL.getmaxdeviations(X, partition)
+ds_X0 = SL.computedeviationdims(X, partition)
 max_ds0 = collect( maximum(ds_X0[k]) for k in eachindex(ds_X0) )
 @show maximum(max_ds0)
 println()
@@ -49,7 +49,7 @@ P, iters_ran = SL.iteratedsl(
 @show length(P)
 
 
-ds_X = SL.getmaxdeviations(X, P)
+ds_X = SL.computedeviationdims(X, P)
 max_ds = collect( maximum(ds_X[k]) for k in eachindex(ds_X) )
 
 @show maximum(max_ds)
