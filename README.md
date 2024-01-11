@@ -2,7 +2,7 @@
 Minimalist single-linkage clustering. 
 
 # Documentation
-The [documentation](https://rwalgorithms.github.io/SingleLinkagePartitions.jl/) has examples.
+The [documentation](https://rwalgorithms.github.io/SingleLinkagePartitions.jl/) for an overview and examples.
 
 # Quick-start
 
