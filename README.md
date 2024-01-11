@@ -1,6 +1,8 @@
 # SingleLinkagePartitions
-Minimalist single-linkage clustering. Follows the algorithm by Sibson.
-Thanks to Dr. Veronika Strnadova-Neeley for her online notes on this topic.
+Minimalist single-linkage clustering. 
+
+# Documentation
+The [documentation](https://rwalgorithms.github.io/SingleLinkagePartitions.jl/) has an overview and examples.
 
 # Quick-start
 
