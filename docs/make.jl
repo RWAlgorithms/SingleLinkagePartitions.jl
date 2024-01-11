@@ -2,17 +2,17 @@ using Documenter
 using SingleLinkagePartitions
 
 
-# # # local.
-# makedocs(
-#     sitename = "SingleLinkagePartitions",
-#     modules = [SingleLinkagePartitions],
-#     #format = Documenter.HTML(),
-#     pages = [
-#         "Overview" => "index.md",
-#         "Public API" => "api.md",
-#         "Demo: chaining & remedy" => "generated/chaining.md",
-#     ],
-# )
+# # local.
+makedocs(
+    sitename = "SingleLinkagePartitions",
+    modules = [SingleLinkagePartitions],
+    #format = Documenter.HTML(),
+    pages = [
+        "Overview" => "index.md",
+        "Public API" => "api.md",
+        "Demo: chaining & remedy" => "generated/chaining.md",
+    ],
+)
 
 # github.
 makedocs(
