@@ -22,7 +22,7 @@ makedocs(
     pages = [
         "Overview" => "index.md",
         "Public API" => "api.md",
-        "Demo: image analysis" => "demo.md",
+        "Demo: chaining & remedy" => "generated/chaining.md",
     ],
 )
 deploydocs(
