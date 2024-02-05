@@ -124,5 +124,90 @@ For each part in a given parition, we can also get the maximum magnitude deviati
 ds_X = SL.computedeviationdims(X, partition_r)
 ```
 
+## Merge duplicates
+Suppose we have a dataset with duplicate locations, but different values. This might occur with historic weather station data from different sources, for example. To merge the entries with the same locations (`X`) by taking the average of the station measurements (`y`) we can use `avgduplicates`.
+
+For example, let's generate station positions `X0`:
+```julia
+import SingleLinkagePartitions as SL
+import Random
+Random.seed!(25)
+
+N_stations = 5
+T = Float64
+
+# generate station positions.
+X0 = collect( randn(T, 2) for _ = 1:N_stations )
+
+# generate station measurements.
+y0 = randn(T, N_stations)
+
+# create a duplicate station location but different measurement.
+push!(X0, X0[begin])
+push!(y0, randn(T))
+
+# average.
+X, y = SL.avgduplicates(X0, y0, eps(T)*10)
+```
+
+Let's see the input and result locations:
+# display:
+```julia
+display(X) # input locations
+display(X0) # result (merged) locations
+```
+
+```
+julia> display(X)
+5-element Vector{Vector{Float64}}:
+ [-0.40243248293794137, 0.8540414903329187]
+ [-0.6651248667822778, -0.9754736537655263]
+ [-0.341379056315598, -1.0410555755312705]
+ [-1.0496381529964869, -1.0289732912432703]
+ [-0.4305269991795779, 0.7262044632757468]
+
+julia> display(X0)
+6-element Vector{Vector{Float64}}:
+ [-0.40243248293794137, 0.8540414903329187]
+ [-0.6651248667822778, -0.9754736537655263]
+ [-0.341379056315598, -1.0410555755312705]
+ [-1.0496381529964869, -1.0289732912432703]
+ [-0.4305269991795779, 0.7262044632757468]
+ [-0.40243248293794137, 0.8540414903329187]
+```
+The first and last entries of `X0` were merged. Let's inspect if the measurements were merged by average:
+```julia
+display(y0)
+display(y)
+y_1_rec = (y0[begin]+y0[end])/2
+display( abs(y_1_rec - y[begin]))
+```
+
+Indeed!
+```
+julia> display(y0)
+6-element Vector{Float64}:
+ 0.8138894370909177
+ 0.6104189261116074
+ 2.0501294946950264
+ 0.18095967976913974
+ 0.9406747232875855
+ 1.0407043988018494
+
+julia> display(y)
+5-element Vector{Float64}:
+ 0.9272969179463835
+ 0.6104189261116074
+ 2.0501294946950264
+ 0.18095967976913974
+ 0.9406747232875855
+
+julia> y_1_rec = (y0[begin]+y0[end])/2
+0.9272969179463835
+
+julia> display( abs(y_1_rec - y[begin]))
+0.0
+```
+
 # Citation
 You can use the *Cite This Repository* button below the *About* section on the GitHub webpage of this repository.

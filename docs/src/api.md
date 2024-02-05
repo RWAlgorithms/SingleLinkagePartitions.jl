@@ -6,6 +6,11 @@
 geteuclideanmetric
 ```
 
+## Reduce points
+
+```@docs
+avgduplicates
+```
 
 ## Partition construction
 

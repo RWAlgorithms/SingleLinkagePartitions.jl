@@ -52,6 +52,8 @@ export getmaxlevel, #
     #getpairwisedists!,
     getpartition, #
     getdistances, #
-    getlargestdistance #
+    getlargestdistance, #
+
+    avgduplicates
     
 end # module SingleLinkagePartitions
