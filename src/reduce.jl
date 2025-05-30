@@ -1,4 +1,3 @@
-
 ## how we determine which level (i.e., which partition) given a tolerance.
 abstract type LevelOption end
 
@@ -40,11 +39,11 @@ picklevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T <: Abstr
 See `UseSLDistance` for a description of *merging distance*.
 Returns the partition for first level `l-1` such that the merging distance between levels ``l`` and ``l-1`` is larger than the `C.atol` struct field. The search starts from ``l`` = 1, ``l-1`` = 0 (the leaf level). 
 """
-function picklevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
-    
+function picklevel(C::UseSLDistance, pt::PartitionTree{T}, args...)::Int where {T <: AbstractFloat}
+
     w = pt.w
-    
-    ind = findfirst(xx->xx>C.atol, w)
+
+    ind = findfirst(xx -> xx > C.atol, w)
     level = length(w)
     if !isnothing(ind)
         level = ind
@@ -63,11 +62,11 @@ picklevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where 
 See `UseSLDistance` for a description of *merging distance*.
 Returns the partition for level `l-1` such that the cumulative sum of merging distances from the level ``0`` (the leaf level) to level ``l``is larger than the `C.atol` struct field. The search starts from ``l`` = 1, ``l-1`` = 0. 
 """
-function picklevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where T <: AbstractFloat
-    
+function picklevel(C::UseCumulativeSLDistance, pt::PartitionTree{T}, args...)::Int where {T <: AbstractFloat}
+
     w = pt.w
-    
-    ind = findfirst(xx->xx>C.atol, cumsum(w))
+
+    ind = findfirst(xx -> xx > C.atol, cumsum(w))
     level = length(w)
     if !isnothing(ind)
         level = ind
@@ -99,31 +98,31 @@ end
 # The output is a copy of X. This is because Statistics.mean creates a copy, even if it is iterated over a single element.
 # mean and variance for the points inside a part, for each part in the partition.
 function getcenters(
-    ::UseMean,
-    X::Vector{XT},
-    partition::Vector{Vector{Int}},
-    )::Vector{XT} where XT <: Union{Number, Vector} # XT is T or Vector{T}, T <: Number.
+        ::UseMean,
+        X::Vector{XT},
+        partition::Vector{Vector{Int}},
+    )::Vector{XT} where {XT <: Union{Number, Vector}} # XT is T or Vector{T}, T <: Number.
 
     return collect(
-        Statistics.mean( X[n] for n in partition[k] )
-        for k in eachindex(partition)
+        Statistics.mean(X[n] for n in partition[k])
+            for k in eachindex(partition)
     )
 end
 
 function getcenters(
-    ::UseProximitytoMean,
-    X::Vector{XT},
-    partition::Vector{Vector{Int}},
-    )::Vector{XT} where XT <: Union{Number, Vector} # XT is T or Vector{T}, T <: Number.
+        ::UseProximitytoMean,
+        X::Vector{XT},
+        partition::Vector{Vector{Int}},
+    )::Vector{XT} where {XT <: Union{Number, Vector}} # XT is T or Vector{T}, T <: Number.
 
     Xm = getcenters(UseMean(), X, partition)
 
     centers = Vector{XT}(undef, length(partition))
     for k in eachindex(partition)
-        
-        _, part_ind = findmin( norm(X[n] - Xm[k]) for n in partition[k] )
+
+        _, part_ind = findmin(norm(X[n] - Xm[k]) for n in partition[k])
         ind = partition[k][part_ind]
-        
+
         centers[k] = X[ind]
     end
 
@@ -132,35 +131,35 @@ end
 
 # the output is a copy, not reference. This is to keep the behavior consist with the other trait/options.
 function getcenters(
-    C::UseScore,
-    X::Vector{XT},
-    partition::Vector{Vector{Int}},
-    )::Vector{XT} where XT <: Union{Number, Vector} # XT is T or Vector{T}, T <: Number.
+        C::UseScore,
+        X::Vector{XT},
+        partition::Vector{Vector{Int}},
+    )::Vector{XT} where {XT <: Union{Number, Vector}} # XT is T or Vector{T}, T <: Number.
 
     #w = C.score
     @assert length(X) == length(C.score)
-    
+
     centers = Vector{XT}(undef, length(partition))
     for k in eachindex(partition)
 
         part_ind = pickrepresentation(C, partition[k])
         ind = partition[k][part_ind]
-        
+
         centers[k] = copy(X[ind])
     end
 
     return centers
 end
 
-function pickrepresentation(C::UseScore{T,UseMaximum}, part) where T
-    _, part_ind = findmax( C.score[n] for n in part )
-    
+function pickrepresentation(C::UseScore{T, UseMaximum}, part) where {T}
+    _, part_ind = findmax(C.score[n] for n in part)
+
     return part_ind
 end
 
-function pickrepresentation(C::UseScore{T,UseMinimum}, part) where T
-    _, part_ind = findmin( C.score[n] for n in part )
-    
+function pickrepresentation(C::UseScore{T, UseMinimum}, part) where {T}
+    _, part_ind = findmin(C.score[n] for n in part)
+
     return part_ind
 end
 
@@ -168,9 +167,9 @@ end
 
 # this version is for when X[n] is a real-valued or complex-valued vector.
 function getvariances(
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
-    partition::Vector{Vector{Int}},
-    )::Vector{T} where T <: AbstractFloat
+        X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+        partition::Vector{Vector{Int}},
+    )::Vector{T} where {T <: AbstractFloat}
 
     @assert !isempty(X)
     D = length(X[begin])
@@ -178,7 +177,7 @@ function getvariances(
     vs = zeros(T, length(partition))
     for k in eachindex(partition)
 
-        for d = 1:D
+        for d in 1:D
             itr = (X[n][d] for n in partition[k])
             vs[k] += Statistics.var(itr; corrected = false)
         end
@@ -189,9 +188,9 @@ end
 
 # each dimension gets its own variance estimate.
 function getseparatevariances(
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
-    partition::Vector{Vector{Int}},
-    )::Vector{Vector{T}} where T <: AbstractFloat
+        X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+        partition::Vector{Vector{Int}},
+    )::Vector{Vector{T}} where {T <: AbstractFloat}
 
     @assert !isempty(X)
     D = length(X[begin])
@@ -200,7 +199,7 @@ function getseparatevariances(
     for k in eachindex(partition)
 
         vs[k] = zeros(T, D)
-        for d = 1:D
+        for d in 1:D
             itr = (X[n][d] for n in partition[k])
             vs[k][d] = Statistics.var(itr; corrected = false)
         end
@@ -211,9 +210,9 @@ end
 
 # this version is for when X[n] is scalar.
 function getvariances(
-    X::Union{Vector{T}, Vector{Complex{T}}},
-    partition::Vector{Vector{Int}},
-    )::Vector{T} where T <: AbstractFloat
+        X::Union{Vector{T}, Vector{Complex{T}}},
+        partition::Vector{Vector{Int}},
+    )::Vector{T} where {T <: AbstractFloat}
 
     @assert !isempty(X)
 
@@ -231,10 +230,10 @@ end
 # output is a copy.
 # the tolerances are based on Euclidean norm, not metric.
 function getreduceptspartition(
-    level_trait::LevelOption,
-    metric::MetricType,
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
-    )::Vector{Vector{Int}} where T <: AbstractFloat
+        level_trait::LevelOption,
+        metric::MetricType,
+        X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+    )::Vector{Vector{Int}} where {T <: AbstractFloat}
 
     pt = computesl(metric, X)
     level = picklevel(level_trait, pt, X)
@@ -247,14 +246,14 @@ end
 
 
 function reducepts(
-    level_trait::LevelOption,
-    center_trait::PartRepOption,
-    metric::MetricType,
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
-    ) where T <: AbstractFloat
-    
+        level_trait::LevelOption,
+        center_trait::PartRepOption,
+        metric::MetricType,
+        X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+    ) where {T <: AbstractFloat}
+
     if length(X) == 1
-        return deepcopy(X), zeros(T, 1), collect( ones(Int,1) for _ = 1:1 )
+        return deepcopy(X), zeros(T, 1), collect(ones(Int, 1) for _ in 1:1)
     end
 
     partition = getreduceptspartition(level_trait, metric, X)
@@ -268,15 +267,15 @@ end
 # the version that also also reduces y.
 # usage: reducing training set of scalar-valued (X, y) regression data.
 function reducepts(
-    level_trait::LevelOption,
-    center_trait::PartRepOption,
-    metric::MetricType,
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
-    y::Vector{YT},
+        level_trait::LevelOption,
+        center_trait::PartRepOption,
+        metric::MetricType,
+        X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+        y::Vector{YT},
     ) where {T <: AbstractFloat, YT <: Number}
-    
+
     if length(X) == 1
-        return deepcopy(X), zeros(T, 1), copy(y), zeros(T, 1), collect( ones(Int,1) for _ = 1:1 )
+        return deepcopy(X), zeros(T, 1), copy(y), zeros(T, 1), collect(ones(Int, 1) for _ in 1:1)
     end
 
     partition = getreduceptspartition(level_trait, metric, X)
@@ -292,15 +291,15 @@ end
 
 # usage: reducing training set of vector-valued (X, y_set) regression data.
 function reducepts(
-    level_trait::LevelOption,
-    center_trait::PartRepOption,
-    metric::MetricType,
-    X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
-    y_set::Vector{Vector{YT}},
+        level_trait::LevelOption,
+        center_trait::PartRepOption,
+        metric::MetricType,
+        X::Union{Vector{Vector{T}}, Vector{Vector{Complex{T}}}},
+        y_set::Vector{Vector{YT}},
     ) where {T <: AbstractFloat, YT <: Number}
-    
+
     if length(X) == 1
-        return deepcopy(X), zeros(T, 1), deepcopy(y_set), collect( zeros(T, 1) for _ in eachindex(y_set) ), collect( ones(Int,1) for _ = 1:1 )
+        return deepcopy(X), zeros(T, 1), deepcopy(y_set), collect(zeros(T, 1) for _ in eachindex(y_set)), collect(ones(Int, 1) for _ in 1:1)
     end
 
     partition = getreduceptspartition(level_trait, metric, X)
@@ -308,8 +307,8 @@ function reducepts(
     Xc = getcenters(center_trait, X, partition)
     Xv = getvariances(X, partition)
 
-    yc_set = collect( getcenters(center_trait, y, partition) for y in y_set )
-    yv_set = collect( getvariances(y, partition) for y in y_set )
+    yc_set = collect(getcenters(center_trait, y, partition) for y in y_set)
+    yv_set = collect(getvariances(y, partition) for y in y_set)
 
     return Xc, Xv, yc_set, yv_set, partition
 end

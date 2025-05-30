@@ -1,4 +1,3 @@
-
 #using LinearAlgebra
 
 import Random
@@ -11,6 +10,26 @@ Random.seed!(25)
 
 #### singlet-linkage clustering.
 T = Float64
+
+# replacement by extrema score.
+U0 = collect(ones(1) for _ in 1:3)
+U0[end][1] = 3
+y0 = [1.1; 1.2; 1.3]
+Uc, yc = SL.replaceduplicates(SL.UseMinimum(), U0, y0, 1.0e-5)
+println("replaceduplicates() with UseMinimum")
+@show U0, y0
+@show Uc, yc
+println()
+
+U0 = collect(ones(1) for _ in 1:3)
+U0[end][1] = 3
+y0 = [1.1; 1.2; 1.3]
+Uc, yc = SL.replaceduplicates(SL.UseMaximum(), U0, y0, 1.0e-5)
+println("replaceduplicates() with UseMaximum")
+@show U0, y0
+@show Uc, yc
+println()
+
 
 # from the README.md.
 X = [
@@ -51,7 +70,7 @@ partition_set = SL.generateallpartitions(pt) # length(partition_set) == length(X
 
 #### reduce points.
 
-atol = convert(T, 1e-4)
+atol = convert(T, 1.0e-4)
 
 
 score = rand(T, N)
@@ -80,7 +99,7 @@ Xc1, vs_X1, yc, vs_y, partition_r = SL.reducepts(
     y,
 )
 
-y_set = collect( randn(Complex{Float32}, N) for _ = 1:3 )
+y_set = collect(randn(Complex{Float32}, N) for _ in 1:3)
 Xc, vs_X, yc_set, vs_y_set, partition_r = SL.reducepts(
     level_trait,
     center_trait,
@@ -90,11 +109,10 @@ Xc, vs_X, yc_set, vs_y_set, partition_r = SL.reducepts(
 )
 
 
-@assert norm(Xc0 - Xc1) < eps(T)*100
-@assert norm(Xc - Xc1) < eps(T)*100
+@assert norm(Xc0 - Xc1) < eps(T) * 100
+@assert norm(Xc - Xc1) < eps(T) * 100
 
-@assert norm(vs0 - vs_X1) < eps(T)*100
-@assert norm(vs_X - vs_X1) < eps(T)*100
+@assert norm(vs0 - vs_X1) < eps(T) * 100
+@assert norm(vs_X - vs_X1) < eps(T) * 100
 
 nothing
-
