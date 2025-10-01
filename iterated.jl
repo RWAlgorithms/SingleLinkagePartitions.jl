@@ -1,4 +1,3 @@
-
 using Random
 Random.seed!(25)
 
@@ -26,12 +25,12 @@ partition = SL.getpartition(pt, level) # instantiate the partition given the lev
 
 # compute the maximum magnitude deviateion from the mean.
 ds_X0 = SL.computedeviationdims(X, partition)
-max_ds0 = collect( maximum(ds_X0[k]) for k in eachindex(ds_X0) )
+max_ds0 = collect(maximum(ds_X0[k]) for k in eachindex(ds_X0))
 @show maximum(max_ds0)
 println()
 
 ##### option 2: repeated runs of SL, each computing a partition tree.
-# At the end of each run, move the parts from the current partition tree to the output partition, P, if it has within acceptance_factor*Z amount of magnitude deviation from the mean, 
+# At the end of each run, move the parts from the current partition tree to the output partition, P, if it has within acceptance_factor*Z amount of magnitude deviation from the mean,
 # where Z is the maximum magnitude deviation out of all the parts in the current partition tree.
 # The points not selected in the run is assembled into a new input X, and repeated.
 # This discourages "chaining", so the deviations within parts tend to be more uniform, while option 1 would have chaining, where the larger parts have a large deviation from its mean when compared to the smaller ones.
@@ -50,17 +49,17 @@ P, iters_ran = SL.iteratedsl(
 
 
 ds_X = SL.computedeviationdims(X, P)
-max_ds = collect( maximum(ds_X[k]) for k in eachindex(ds_X) )
+max_ds = collect(maximum(ds_X[k]) for k in eachindex(ds_X))
 
 @show maximum(max_ds)
 println()
 
 # sanity check: P should contain unique entries that take value from 1:length(X).
-P_flat = collect( Iterators.flatten(P))
-partition_flat = collect( Iterators.flatten(partition))
+P_flat = collect(Iterators.flatten(P))
+partition_flat = collect(Iterators.flatten(partition))
 
 # P should contain unique integers from 1:length(X)
-@assert norm(unique(sort(P_flat)) - collect(1:length(X))) < eps(T)*10
+@assert norm(unique(sort(P_flat)) - collect(1:length(X))) < eps(T) * 10
 
 
 # visualize the distribution of maximum deviations between the two options.

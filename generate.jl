@@ -6,7 +6,7 @@ function replace_includes(str)
     path = "./"
 
     for ex in included
-        content = read(path*ex, String)
+        content = read(path * ex, String)
         str = replace(str, "include(\"$(ex)\")" => content)
     end
     return str
