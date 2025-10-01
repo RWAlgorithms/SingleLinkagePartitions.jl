@@ -208,10 +208,10 @@ end
 function compute_partition_for_reduction(
         level_trait::LevelOption,
         dist_callable,
-        X::AbstractVector{<:AbstractVector{<:Number}},
+        X::Union{AbstractVector{<:AbstractVector{<:Number}}, AbstractMatrix{<:Number}},
     )
 
-    s = SLINKState(get_real_type(X), length(X))
+    s = SLINKState(get_real_type(X), get_num_entries(X))
     slink!(s, dist_callable, X)
 
     level = pick_level(level_trait, s, X)
@@ -221,6 +221,22 @@ end
 
 ### frontends
 
+"""
+    reduce_pts(
+        level_trait::LevelOption,
+        center_trait::PartRepOption,
+        dist_callable,
+        X::AbstractVector{<:AbstractVector{NT}},
+    ) where {NT <: Number}
+
+Returns:
+
+- `centers::Memory{XT}`, if `X::AbstractVector{XT}`. This is the set of reduced points.
+
+- `variances::Memory{NT}`: the variances of the reduced points. If there were no points reduced, then the variance entry is zero.
+
+- `partition::Memory{Memory{Int}}`: the partition of `X` that was used to make the reduction. The elements of a part are replaced with a part representative according to `center_trait`.
+"""
 function reduce_pts(
         level_trait::LevelOption,
         center_trait::PartRepOption,
@@ -242,6 +258,30 @@ end
 # the version that also also reduces y.
 # usage: reducing training set of scalar-valued (X, y) regression data.
 # limit X and y to stride-1, 1-indexing arrays.
+"""
+    reduce_pts(
+        level_trait::LevelOption,
+        center_trait::PartRepOption,
+        dist_callable,
+        X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
+        y::AbstractVector{YT},
+    ) where {T <: AbstractFloat, YT <: Number}
+
+`X` is the parimary input point set, which is used to determine the reduction. `y` is a companion input point set, that is reduced according to how points in `X` are reduced.
+
+Returns:
+
+- `Xc::Memory{XT}`, if `X::AbstractVector{XT}`. This is the set of reduced points from `X`.
+
+- `Xv::Memory{NT}`: the variances of the merged points from `X`. If there were no points merged, then the variance entry is zero.
+
+-`yc::Memory{XT}`, if `X::AbstractVector{XT}`. This is the set of reduced points from `y`.
+
+- `yv::Memory{NT}`: the variances of the merged points from `y`. If there were no points merged, then the variance entry is zero.
+
+
+- `partition::Memory{Memory{Int}}`: the partition of `X` and `y` that was used to make the reduction. The elements of a part are replaced with a part representative according to `center_trait`.
+"""
 function reduce_pts(
         level_trait::LevelOption,
         center_trait::PartRepOption,
@@ -249,6 +289,8 @@ function reduce_pts(
         X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
         y::AbstractVector{YT},
     ) where {T <: AbstractFloat, YT <: Number}
+
+    length(X) == length(y) || error("Length mismatch.")
 
     if length(X) == 1
         return _singleton_reduction(X)
@@ -264,49 +306,48 @@ function reduce_pts(
     return Xc, Xv, yc, yv, partition
 end
 
-# usage: reducing training set of vector-valued (X, y_set) regression data.
+"""
+    reduce_pts(
+        level_trait::LevelOption,
+        center_trait::PartRepOption,
+        dist_callable,
+        X::AbstractVector{<:AbstractVector{<:Number}},
+        Y::AbstractVector{<:AbstractVector{<:Number}},
+    )
+
+`X` is the parimary input point set, which is used to determine the reduction. `y` is a companion input point set, that is reduced according to how points in `X` are reduced.
+
+Returns:
+
+- `Xc::Memory{XT}`, if `X::AbstractVector{XT}`. This is the set of reduced points from `X`.
+
+- `Xv::Memory{NT}`: the variances of the merged points from `X`. If there were no points merged, then the variance entry is zero. `NT` is the underlying floating-point type of `X`.
+
+-`Yc::Memory{XT}`, if `X::AbstractVector{XT}`. This is the set of reduced points from `Y`.
+
+- `Yv::Memory{NT}`: the variances of the merged points from `Y`. If there were no points merged, then the variance entry is zero. `NT` is the underlying floating-point type of `Y`.
+
+- `partition::Memory{Memory{Int}}`: the partition of `X` and `y` that was used to make the reduction. The elements of a part are replaced with a part representative according to `center_trait`.
+"""
 function reduce_pts(
         level_trait::LevelOption,
         center_trait::PartRepOption,
         dist_callable,
-        X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
-        y_set::AbstractVector{<:AbstractVector{YT}},
-    ) where {T <: AbstractFloat, YT <: Number}
+        X::AbstractVector{<:AbstractVector{<:Number}},
+        Y::AbstractVector{<:AbstractVector{<:Number}},
+    )
+    !isempty(X)  || error("Empty input set.")
+    length(X) == length(Y) || error("Incompatible input sizes.")
 
-    if length(X) == 1
-        return _singleton_reduction(X)
-    end
+    length(X) > 1 || error("reduce_pts requires more than two points in the input set.")
 
-    #partition = getreduceptspartition(level_trait, metric, X)
     partition = compute_partition_for_reduction(level_trait, dist_callable, X)
 
     Xc = compute_representatives(center_trait, X, partition)
     Xv = _compute_variances(X, partition)
 
-    yc_set = collect(compute_representatives(center_trait, y, partition) for y in y_set)
-    yv_set = collect(_compute_variances(y, partition) for y in y_set)
+    Yc = compute_representatives(center_trait, Y, partition)
+    Yv = _compute_variances(Y, partition)
 
-    return Xc, Xv, yc_set, yv_set, partition
-end
-
-function _singleton_reduction(X::AbstractVector{AbstractVector{T}}) where {T <: Number}
-    centers = _create_mem(X)
-
-    variances = Memory{T}(undef, 1)
-    fill!(variances, 0)
-
-    partition = Memory{Memory{Int}}(undef, 1)
-    partition[begin] = Memory{Int}(undef, 1)
-    partition[begin][begin] = 1
-
-    return centers, variances, partition
-end
-
-function _create_mem(X::AbstractVector{AbstractVector{T}}) where {T <: Number}
-
-    Z = Memory{Memory{T}}(undef, length(X))
-    for i in eachindex(X, Z)
-        Z[i] = Memory{T}(X[i])
-    end
-    return Z
+    return Xc, Xv, Yc, Yv, partition
 end

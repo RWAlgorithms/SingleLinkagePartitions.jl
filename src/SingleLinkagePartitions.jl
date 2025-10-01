@@ -9,7 +9,7 @@ using Statistics
 """
     vecs_to_mat(X::AbstractVector{<:AbstractVector{T}}) where {T}
 
-Returns a matrix constructed from X, with X[d,n] == X[n][d]. Return type is `Matrix{T}`.
+Returns a matrix constructed from `X`, with `X[d,n] == X[n][d]`. Return type is `Matrix{T}`.
 """
 function vecs_to_mat(X::AbstractVector{<:AbstractVector{T}}) where {T}
     !isempty(X) || error("X must be non-empty.")
@@ -22,6 +22,18 @@ end
 
 function get_real_type(::AbstractVector{<:AbstractVector{T}}) where {T <: AbstractFloat}
     return T
+end
+
+function get_real_type(::AbstractMatrix{T}) where {T <: AbstractFloat}
+    return T
+end
+
+function get_num_entries(A::AbstractMatrix)
+    return size(A, 2)
+end
+
+function get_num_entries(x::AbstractVector)
+    return length(x)
 end
 
 include("slink.jl")
@@ -46,6 +58,8 @@ public slink!, EuclideanDistance, SLINKState,
     UseScore,
     UseMaximum, UseMinimum, ScoreTrait,
 
-    reduce_pts, avg_duplicates, replace_duplicates
+    reduce_pts, avg_duplicates, replace_duplicates,
+
+    compute_max_deviation, iterated_sl
 
 end # module SingleLinkagePartitions

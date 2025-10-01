@@ -2,8 +2,6 @@
 EditURL = "../../../examples/chaining.jl"
 ```
 
-run the contents of preproc.txt to generate markdown.
-
 # Load dependencies for this demo
 run `using Pkg; Pkg.add("name-of-dependency)` if you have missing dependencies.
 
@@ -65,7 +63,7 @@ PLT.axis("scaled")
 PLT.title("Input point set")
 PLT.gcf()
 ````
-![](chaining-12.png)
+![](chaining-11.png)
 
 ## Single-linkage clustering
 Single-linkage clustering is a method to generate a partition tree, which is a set of nested partitions.
@@ -77,7 +75,7 @@ s = SL.SLINKState(T, N)
 ````
 
 ````
-SingleLinkagePartitions.SLINKState{Float64}([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [5.0e-324, 6.93341592494787e-310, 5.0e-324, 6.93341592494945e-310, 5.0e-324, 6.93341592495103e-310, 5.0e-324, 6.9334159249526e-310, 5.0e-324, 6.9334159249542e-310], [4294967297, 4294967297, 4294967297, 4294967297, 34359738376, 34359738376, 38654705673, 42949672970, 47244640267, 12])
+SingleLinkagePartitions.SLINKState{Float64}([6.9069441482732e-310, 6.9069441482748e-310, 1.5e-323, 1.9e-322, 1.0e-323, 1.0e-323, 0.0, 0.0, 0.0, 0.0], [6.90694414801076e-310, 6.9069441479902e-310, 6.90694414797914e-310, 6.90694414799495e-310, 6.9069441479918e-310, 6.9069441479839e-310, 6.906944148006e-310, 6.90694414800443e-310, 6.9069441480139e-310, 6.9069441480155e-310], [139798105902544, 139798105904752, 139798105904784, 139798105904816, 139798105904848, 139798105904880, -5623792469277868032, 139798105904336, 139798105908080, 139798105908080])
 ````
 
 Run the SLINK algorithm. This computes the essential data required to construct the partition tree.
@@ -148,7 +146,7 @@ PLT.title(title_string)
 PLT.legend()
 PLT.gcf()
 ````
-![](chaining-23.png)
+![](chaining-22.png)
 
 50 percent from leaf (all singleton parts) to root (every point is in the same part).
 
@@ -181,7 +179,7 @@ PLT.title(title_string)
 PLT.legend()
 PLT.gcf()
 ````
-![](chaining-25.png)
+![](chaining-24.png)
 
 75 percent from leaf (all singleton parts) to root (every point is in the same part).
 
@@ -214,7 +212,7 @@ PLT.title(title_string)
 PLT.legend()
 PLT.gcf()
 ````
-![](chaining-27.png)
+![](chaining-26.png)
 
 We can see that only a single part gets larger and larger. This is because the minimum distance between all parts for a partition at a given level is one that involves the large part. This characteristic with single-linkage clustering is known as *chaining* in some literature. It may be something that is desirable or undesirable, depending on the application.
 
@@ -259,7 +257,7 @@ PLT.ylabel("The Maximum deviation of a partition")
 PLT.title("Maximum deviation of all partitions in the tree")
 PLT.gcf()
 ````
-![](chaining-33.png)
+![](chaining-32.png)
 
 Since it is approximately monotonic, we use a bracketed binary search to select a partition such that its maximum deviation is approximate the best match from all the partitions to the specified value `max_dev`. We then do a linear search from this search result in the reverse nesting order to find the first partition that has a smaller maximum deviation. These procedures are implemented in `pick_level` that specializes for `level_config::UseMaxDeviation`. Please see the terminology section for details.
 One can alternatively do a linear search over `max_ds` to pick a level, which is easy to implement yourself given `max_ds`, which was computed earlier.
@@ -306,7 +304,7 @@ PLT.title(title_string)
 PLT.legend()
 PLT.gcf()
 ````
-![](chaining-37.png)
+![](chaining-36.png)
 
 # Iterated single-linkage to reduce chaining
 If it is desirable to reduce chaining, then we can use an iterated version of `pick_level`. So far, only `UseMaxDeviation` is implemented for iteration.
@@ -364,7 +362,7 @@ PLT.title(title_string)
 PLT.legend()
 PLT.gcf()
 ````
-![](chaining-44.png)
+![](chaining-43.png)
 
 This concludes the demo
 

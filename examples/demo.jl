@@ -42,6 +42,7 @@ X = [
     [-0.6283556049853254, 0.35921840490046464, -1.1166717373759707],
     [1.2421363428579315, 0.47437350434528236, -0.5869506255304089],
 ]
+D = 3
 
 # Let's purposely make the last point in the set to be very similar to the first point. We'll try to merge these two points in this example.
 X[end] = X[1] .+ 0.00001 * randn(rng, 3)
@@ -97,9 +98,12 @@ Xc0, vs0, partition_r0 = SL.reduce_pts(
     X,
 )
 
-# reduce both `X` and companion input `y`.
+println("The last point of Y is to be merged because the last slot of partition_r0 has a non-singleton part.")
+@show partition_r0
+
+# reduce both `X` and companion point set, `y`. This version is when the points in `y` is 1-D.
 y = randn(rng, Complex{Float32}, N)
-Xc1, vs_X1, yc, vs_y, partition_r1 = SL.reduce_pts(
+Xc1, vs_X1, yc, vs_y, partition_r2 = SL.reduce_pts(
     level_trait,
     merge_trait,
     dist_callable,
@@ -107,27 +111,29 @@ Xc1, vs_X1, yc, vs_y, partition_r1 = SL.reduce_pts(
     y,
 )
 
-# reduce both `X` and companion input `y_set`.
-y_set = collect(randn(rng, Complex{Float32}, N) for _ in 1:3)
-Xc, vs_X, yc_set, vs_y_set, partition_r2 = SL.reduce_pts(
+# Companion point set is multi-dim.
+D_y = 2
+Y = collect(randn(rng, Complex{Float32}, D_y) for _ in 1:N)
+Xc3, vs_X3, Yc3, vs_Y3, partition_r3 = SL.reduce_pts(
     level_trait,
     merge_trait,
     dist_callable,
     X,
-    y_set,
+    Y,
 )
 
-@assert norm(Xc0 - Xc1) < eps(T) * 100
-@assert norm(Xc - Xc1) < eps(T) * 100
+# make sure the reduced primary input set is the same, between the companion input versions of `reduce_pts`.
+@assert all(partition_r0 .== partition_r2)
+@assert all(partition_r3 .== partition_r2)
 
-@assert norm(vs0 - vs_X1) < eps(T) * 100
-@assert norm(vs_X - vs_X1) < eps(T) * 100
+@assert norm(Xc0 - Xc1) < eps(T) * 100
+@assert norm(Xc0 - Xc3) < eps(T) * 100
+@assert norm(vs0 - vs_X3) < eps(T) * 100
 
 # ## Routines built on reduce_pts
 
 # average ponts that are very close together. `SL.UseSLDistance(a_tol)` is used to select a partition before averageing the points in each part.
 X_avg, y_avg = SL.avg_duplicates(X, y, atol)
-@assert abs((y[1] + y[end]) / 2 - y_avg[end]) < eps(T) * 100
 
 # Similar to avg_duplicates, but does not use the mean as the representative merged point. Instead, use the point with the corresponding lowest score in y as the merged representative.
 scores = randn(rng, T, length(X))

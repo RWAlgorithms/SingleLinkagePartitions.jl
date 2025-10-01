@@ -23,7 +23,7 @@ end
     ) where {T <: AbstractFloat}
 
 
-Returns a partition `P``, and `iters_ran`. Return type is `Tuple{Vector{Vector{Int}}, Int}`.
+Returns a partition `P`, and `iters_ran`. Return type is `Tuple{Vector{Vector{Int}}, Int}`.
 Iteratively run single-linkage clustering with `UseMaxDeviation ` and `picklevel(` to select a partition at every iteration. Some of the parts in the selected partition are chosen to be moved to a solution partition, and the associated points won't be used for the next iteration of single-linkage clustering.
 See the documentation website for details on the iteration algorithm, including terminating conditions.
 
@@ -63,7 +63,6 @@ function iterated_sl(
         ds_X = compute_deviation_dims(X, partition)
         max_ds = collect(maximum(ds_X[k]) for k in eachindex(ds_X))
         max_all_ds = maximum(max_ds)
-        #max_all_ds = computemaxdeviation(X, partition)
         keep_dev = acceptance_factor * max_all_ds
 
         # these inds are for partition.
@@ -130,61 +129,4 @@ function compute_deviation_dims(
     end
 
     return vs
-end
-
-
-# computes ρ(X[partition]); see documentation website.
-"""
-    computemaxdeviation(
-        X::Union{AbstractVector{<: AbstractVector{T}}, AbstractVector{ <: AbstractVector{Complex{T}}}},
-        s::SLINKState,
-        level::Integer,
-    ) where T <: AbstractFloat
-
-This version extracts the partition assocaited with `level` from `pt`, then calls `computemaxdeviation(X, partition)`.
-"""
-function computemaxdeviation(
-        X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
-        s::SLINKState,
-        level::Integer,
-    ) where {T <: AbstractFloat}
-
-    return compute_deviation_dims(X, getpartition(pt, level))
-end
-
-
-"""
-    computemaxdeviation(
-        X::Union{AbstractVector{<: AbstractVector{T}}, AbstractVector{ <: AbstractVector{Complex{T}}}},
-        partition::Vector{Vector{Int}},
-    ) where T <: AbstractFloat
-
-Given a point set X on a D-dimensional vector space, we define the *maximum deviation of a partition* P_X of X as:
-```julia
-ρ = maximum(
-    maximum(
-        maximum(
-            abs(a[d]-mean(A)[d])
-            for a in A
-        )
-        for A in P_X
-    )
-    for d in 1:D
-)
-```
-
-`computemaxdeviation` computes ρ a bit more efficiently, with
-'''julia
-P_X = collect( X[partition[k]] for k in eachindex(partition) )
-'''
-"""
-function computemaxdeviation(
-        X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
-        partition::Vector{Vector{Int}},
-    ) where {T <: AbstractFloat}
-
-    ds_X = computedeviationdims(X, partition)
-    max_ds = collect(maximum(ds_X[k]) for k in eachindex(ds_X))
-
-    return maximum(max_ds)
 end

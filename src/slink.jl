@@ -167,7 +167,7 @@ end
 
 This function allocates. Run `slink!` on `s` first. Return type is `Memory{Memory{Int}}`.
 
-`num_fuses` identifies the partition tree level. It can take on values between 0 to `get_cardinality(s)`.
+`num_fuses` identifies the partition tree level. It can take on values between `0` to `get_cardinality(s)`.
 """
 function construct_partition(s::SLINKState, num_fuses::Integer)
 

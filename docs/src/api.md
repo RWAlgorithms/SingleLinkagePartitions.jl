@@ -3,68 +3,117 @@
 ## Core
 
 ```@docs
-geteuclideanmetric
-```
-
-## Reduce points
-
-```@docs
-avgduplicates
-```
-
-## Partition construction
-
-### Dispatch types/traits/configs
-```@docs
-UseMaxDeviation
+SingleLinkagePartitions.construct_partition
 ```
 
 ```@docs
-UseSLDistance
+SingleLinkagePartitions.construct_partition_tree
 ```
 
 ```@docs
-UseCumulativeSLDistance
-```
-
-### Functions
-
-```@docs
-computesl
+SingleLinkagePartitions.iterated_sl
 ```
 
 ```@docs
-picklevel
+SingleLinkagePartitions.slink!
 ```
 
 ```@docs
-computemaxdeviation
+SingleLinkagePartitions.SLINKState
+```
+
+## Utilities
+
+```@docs
+SingleLinkagePartitions.construct_distances
 ```
 
 ```@docs
-iteratedsl
-```
-
-## Get/Set routines
-
-### Partition tree data type `PartitionTree`
-
-```@docs
-getmaxlevel
+SingleLinkagePartitions.compute_max_deviation
 ```
 
 ```@docs
-getpartition
+SingleLinkagePartitions.EuclideanDistance
 ```
 
 ```@docs
-getdistances
+SingleLinkagePartitions.get_cardinality
 ```
 
 ```@docs
-generateallpartitions
+SingleLinkagePartitions.pick_level
 ```
 
 ```@docs
-getlargestdistance
+SingleLinkagePartitions.get_max_level
+```
+
+```@docs
+SingleLinkagePartitions.vecs_to_mat
+```
+
+## Application routines
+
+```@docs
+SingleLinkagePartitions.avg_duplicates
+```
+
+```@docs
+SingleLinkagePartitions.reduce_pts
+```
+
+```@docs
+SingleLinkagePartitions.replace_duplicates
+```
+
+## Options
+
+### Level
+
+```@docs
+SingleLinkagePartitions.LevelOption
+```
+
+```@docs
+SingleLinkagePartitions.UseCumulativeSLDistance
+```
+
+```@docs
+SingleLinkagePartitions.UseSLDistance
+```
+
+```@docs
+SingleLinkagePartitions.UseMaxDeviation
+```
+
+### Partition representative
+
+```@docs
+SingleLinkagePartitions.PartRepOption
+```
+
+```@docs
+SingleLinkagePartitions.UseProximitytoMean
+```
+
+```@docs
+SingleLinkagePartitions.UseMean
+```
+
+#### Score options
+
+```@docs
+SingleLinkagePartitions.UseMinimum
+```
+
+```@docs
+SingleLinkagePartitions.UseMaximum
+```
+
+```@docs
+SingleLinkagePartitions.UseScore
+```
+
+```@docs
+SingleLinkagePartitions.ScoreTrait
 ```

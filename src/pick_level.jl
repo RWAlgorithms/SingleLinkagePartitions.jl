@@ -16,7 +16,7 @@ struct UseCumulativeSLDistance{T} <: LevelOption
 
     Creates a variable of type `UseCumulativeSLDistance{T} <: LevelOption`.
 
-    Given a partition tree, the part/cluster that merged as we traverse from level ``l`` to level ``l+1`` is the *merging distance* of the two levels.
+    Given a partition tree, the part/cluster that merged as we traverse from level `l` to level `l+1` is the *merging distance* of the two levels.
 
     `UseCumulativeSLDistance` specifies the threshold on the cumulative merging distance from level `0` to `l`. For use with `reduce_pts`. The internals of `UseCumulativeSLDistance` are considered private API.
     """
@@ -33,22 +33,13 @@ struct UseSLDistance{T} <: LevelOption
 
     Creates a variable of type `UseSLDistance{T} <: LevelOption`.
 
-    Given a partition tree, the part/cluster that merged as we traverse from level ``l`` to level ``l+1`` is the *merging distance* of the two levels.
+    Given a partition tree, the part/cluster that merged as we traverse from level `l` to level `l+1` is the *merging distance* of the two levels.
 
     `UseSLDistance` specifies the threshold merging distance of level `l` and `l+1`. For use with `reduce_pts`. The internals of `UseSLDistance` are considered private API.
     """
     function UseSLDistance(atol::T) where {T <: AbstractFloat}
         return new{T}(atol)
     end
-end
-
-"""
-    get_distance(c::LevelOption)
-
-Returns the stored threshold distance for `c`. Return type is the floating point type of `c`.
-"""
-function get_distance(c::LevelOption)
-    return c.atol
 end
 
 """
@@ -77,7 +68,7 @@ end
     pick_level(C::UseCumulativeSLDistance, s::SLINKState, unused_args...)
 
 See `UseCumulativeSLDistance` for a description of *merging distance*.
-Returns the partition for level `l-1` such that the cumulative sum of merging distances from the level ``0`` (the leaf level) to level ``l``is larger than the `C.atol` struct field. The search starts from ``l`` = 1, ``l-1`` = 0.
+Returns the partition for level `l-1` such that the cumulative sum of merging distances from the level `0` (the leaf level) to level `l`is larger than the `C.atol` struct field. The search starts from `l = 1`, `l-1 = 0`.
 
 This function allocates. Run `slink!` on `s` first. Return type is `Int`.
 """
@@ -112,7 +103,7 @@ struct UseMaxDeviation{T <: AbstractFloat} <: LevelOption
     Creates a variable of type `UseMaxDeviation{T} <: LevelOption`.
 
     Terminology:
-    Given a point set X on a D-dimensional vector space, we define the *maximum deviation of a partition* P_X of X as:
+    Given a point set X on a D-dimensional vector space, we define the *maximum deviation of a partition* `P_X` of `X` as:
     ```julia
     ρ = maximum(
         maximum(
@@ -133,7 +124,7 @@ struct UseMaxDeviation{T <: AbstractFloat} <: LevelOption
 
     The reason the implemented methods associated with `UseMaxDeviation` does not guaranteed to return the best match is because the sequence of maximum deviations that corresponds to the nesting order of partitions is not guaranteed to be monotonic.
 
-    The `max_dev` input should be a non-negative number. It is clamped to zero if the `max_dev` provided is a negative number. Setting this to `0` corresponds to selecting the trivial partition where every point is a singleton part, i.e., level 0 of the partition tree.
+    The `max_dev` input should be a non-negative number. It is clamped to zero if the `max_dev` provided is a negative number. Setting this to `0` corresponds to selecting the trivial partition where every point is a singleton part, i.e., level `0` of the partition tree.
 
     The internals of `UseMaxDeviation` is considered private API.
     """
@@ -197,21 +188,8 @@ function pick_level(
     return level
 end
 
-
-"""
-    binary_search(
-        f::Function,
-        target_score::T,
-        p_lb::T,
-        p_ub::T;
-        atol::T = convert(T, 1.0e-5),
-        max_iters = 100,
-    ) where {T <: AbstractFloat}
-
-For this function to return a good approximate to the target_score, `f` must be a strictly increasing monotonic function, and that `f(p) == target_score` for some p such that `p_lb <= p <= p_ub`.
-
-`f` must be a callable variable that takes an input of type `T` and returns an output of type `T`.
-"""
+# For this function to return a good approximate to the target_score, `f` must be a strictly increasing monotonic function, and that `f(p) == target_score` for some p such that `p_lb <= p <= p_ub`.
+# `f` must be a callable variable that takes an input of type `T` and returns an output of type `T`.
 function binary_search(
         f,
         target_score::T,
@@ -262,7 +240,7 @@ end
         partition::AbstractVector{<:AbstractVector{Int}},
     ) where T <: AbstractFloat
 
-Given a point set X on a D-dimensional vector space, we define the *maximum deviation of a partition* P_X of X as:
+Given a point set `X` on a *D*-dimensional vector space, we define the *maximum deviation of a partition* `P_X` of `X` as:
 ```julia
 ρ = maximum(
     maximum(
@@ -277,6 +255,7 @@ Given a point set X on a D-dimensional vector space, we define the *maximum devi
 ```
 
 Computes the maximum of the maximum deviations of a partition of `X`.
+This is `ρ_dim(X[partition])` from the documentation website home page.
 
 Returns a number of type `T`.
 """
@@ -284,8 +263,6 @@ function compute_max_deviation(
         X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
         partition::AbstractVector{<:AbstractVector{Int}},
     ) where {T <: AbstractFloat}
-
-    # based on compute_deviations.
 
     !isempty(X) || error("X must be non-empty.")
     D = length(X[begin])
@@ -301,40 +278,4 @@ function compute_max_deviation(
         end
     end
     return out
-end
-
-# previously computedeviationdims
-# computes ρ_dim(X[partition]); see the documentation website.
-"""
-    compute_deviations(
-        X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
-        partition::AbstractVector{<:AbstractVector{Int}},
-    ) where T <: AbstractFloat
-
-Computes the maximum deviations of a partition of `X`.
-
-Returns a number of type `Memory{Memory{T}}` if `typeof(X) <: AbstractVector{<:AbstractVector{T}}` or `typeof(X) <: AbstractVector{<:AbstractVector{Complex{T}}}`.
-"""
-function compute_deviations(
-        X::Union{AbstractVector{<:AbstractVector{T}}, AbstractVector{<:AbstractVector{Complex{T}}}},
-        partition::AbstractVector{<:AbstractVector{Int}},
-    ) where {T <: AbstractFloat}
-
-    !isempty(X) || error("X must be non-empty.")
-    D = length(X[begin])
-
-    vs = Memory{Memory{T}}(undef, length(partition))
-    for k in eachindex(partition)
-
-        μ = Statistics.mean(X[n] for n in partition[k])
-
-        vs[k] = Memory{T}(undef, D)
-        fill!(vs[k], zero(T))
-        for d in 1:D
-            # max norm, aka l-infinity norm of X[n] - μ, for n ∈ partition[k].
-            vs[k][d] = maximum(abs(X[n][d] - μ[d]) for n in partition[k])
-        end
-    end
-
-    return vs
 end

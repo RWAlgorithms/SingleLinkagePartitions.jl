@@ -1,6 +1,8 @@
 # SingleLinkagePartitions
 Minimalist single-linkage clustering.
 
+This package is currently only tested against arrays that start at index 1, and has stride 1.
+
 # Documentation
 The [documentation](https://rwalgorithms.github.io/SingleLinkagePartitions.jl/) for an overview and examples.
 
@@ -8,11 +10,13 @@ The [documentation](https://rwalgorithms.github.io/SingleLinkagePartitions.jl/) 
 
 ```julia
 import Random
+rng = Random.Xoshiro(0)
 
 import SingleLinkagePartitions as SL
 using LinearAlgebra
 
 T = Float64
+copy_trait = SL.MakeCopy()
 
 #### singlet-linkage clustering.
 
@@ -119,13 +123,28 @@ Xc0, vs0, partition_r0 = SL.reduce_pts(
     X,
 )
 
+
+println("The last point of Y is to be merged because the last slot of partition_r0 has a non-singleton part.")
+@show partition_r0
+```
+The output should be:
+```
+8-element Memory{Memory{Int64}}:
+ [2]
+ [3]
+ [4]
+ [5]
+ [6]
+ [7]
+ [8]
+ [1, 9, 10]
 ```
 
 We could also pass in additional point sets to reduce, with the reduction based on the point distances in the primary point set, `X`.
 ```julia
-# reduce both `X` and companion input `y`.
+# reduce both `X` and companion point set, `y`. This version is when the points in `y` is 1-D.
 y = randn(rng, Complex{Float32}, N)
-Xc1, vs_X1, yc, vs_y, partition_r1 = SL.reduce_pts(
+Xc1, vs_X1, yc, vs_y, partition_r2 = SL.reduce_pts(
     level_trait,
     merge_trait,
     dist_callable,
@@ -133,24 +152,26 @@ Xc1, vs_X1, yc, vs_y, partition_r1 = SL.reduce_pts(
     y,
 )
 
-# reduce both `X` and companion input `y_set`.
-y_set = collect(randn(rng, Complex{Float32}, N) for _ in 1:3)
-Xc, vs_X, yc_set, vs_y_set, partition_r2 = SL.reduce_pts(
+# Companion point set is multi-dim.
+D_y = 2
+Y = collect(randn(rng, Complex{Float32}, D_y) for _ in 1:N)
+Xc3, vs_X3, Yc3, vs_Y3, partition_r3 = SL.reduce_pts(
     level_trait,
     merge_trait,
     dist_callable,
     X,
-    y_set,
+    Y,
 )
 ```
 
 Check if the reduced primary point set is the same as the one without companion inputs:
 ```julia
-@assert norm(Xc0 - Xc1) < eps(T) * 100
-@assert norm(Xc - Xc1) < eps(T) * 100
+@assert all(partition_r0 .== partition_r2)
+@assert all(partition_r3 .== partition_r2)
 
-@assert norm(vs0 - vs_X1) < eps(T) * 100
-@assert norm(vs_X - vs_X1) < eps(T) * 100
+@assert norm(Xc0 - Xc1) < eps(T) * 100
+@assert norm(Xc0 - Xc3) < eps(T) * 100
+@assert norm(vs0 - vs_X3) < eps(T) * 100
 ```
 
 For each part in a given parition, we can also get the maximum magnitude deviation from the mean for each dimension.
@@ -164,7 +185,6 @@ This package implements `avg_duplicates` and `replace_duplicates`, which are bui
 ```julia
 # average ponts that are very close together. `SL.UseSLDistance(a_tol)` is used to select a partition before averageing the points in each part.
 X_avg, y_avg = SL.avg_duplicates(X, y, atol)
-@assert abs((y[1] + y[end]) / 2 - y_avg[end]) < eps(T) * 100
 
 # Similar to avg_duplicates, but does not use the mean as the representative merged point. Instead, use the point with the corresponding lowest score in y as the merged representative.
 scores = randn(rng, T, length(X))

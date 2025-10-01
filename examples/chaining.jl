@@ -1,5 +1,3 @@
-# run the contents of preproc.txt to generate markdown.
-
 # # Load dependencies for this demo
 # run `using Pkg; Pkg.add("name-of-dependency)` if you have missing dependencies.
 
@@ -145,5 +143,4 @@ ARGS = (partition, title_string, X, fig_num, marker_size)
 include("./snippet/plot_partition.jl")
 
 # This concludes the demo
-
 nothing;

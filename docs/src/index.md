@@ -1,6 +1,6 @@
 # SingleLinkagePartitions.jl
 
-This package implements the single-linkage clustering algorithm via a minimum spanning tree approach. It is suitable for handling data that can fit in the local machine's RAM.
+This package implements the single-linkage clustering algorithm via the [SLINK algorithm](https://doi.org/10.1093/comjnl/16.1.30). It is suitable for handling data that can fit in the local machine's RAM.
 
 Single-linkage clustering is a hierarchical clustering method, which means for a dataset of ``N`` points in ``\mathbb{R}^{D}``, it generates a set of ``N`` nested partitions. The implementation here uses a minimum-spanning tree, which should offer some efficiency and flexibility than the naive single-linkage clustering algorithm.
 
