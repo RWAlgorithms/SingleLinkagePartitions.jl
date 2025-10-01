@@ -70,8 +70,6 @@ function iterated_sl(
         update_inds = findall(xx -> xx >= keep_dev, max_ds) # LHS can't be empty due to previous if statement.
         next_inds = setdiff(1:length(partition), update_inds)
 
-        #@show length(update_inds), keep_dev, max_all_ds # debug.
-
         if isempty(next_inds)
             # no points left.
 
@@ -142,7 +140,7 @@ end
         s::SLINKState,
         level::Integer,
     ) where T <: AbstractFloat
-    
+
 This version extracts the partition assocaited with `level` from `pt`, then calls `computemaxdeviation(X, partition)`.
 """
 function computemaxdeviation(
@@ -160,7 +158,7 @@ end
         X::Union{AbstractVector{<: AbstractVector{T}}, AbstractVector{ <: AbstractVector{Complex{T}}}},
         partition::Vector{Vector{Int}},
     ) where T <: AbstractFloat
-    
+
 Given a point set X on a D-dimensional vector space, we define the *maximum deviation of a partition* P_X of X as:
 ```julia
 ρ = maximum(
@@ -175,7 +173,7 @@ Given a point set X on a D-dimensional vector space, we define the *maximum devi
 )
 ```
 
-`computemaxdeviation` computes ρ a bit more efficiently, with 
+`computemaxdeviation` computes ρ a bit more efficiently, with
 '''julia
 P_X = collect( X[partition[k]] for k in eachindex(partition) )
 '''

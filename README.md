@@ -1,6 +1,5 @@
 # SingleLinkagePartitions
 Minimalist single-linkage clustering.
-# TODO check over demo again, update this readme, push to repo
 
 # Documentation
 The [documentation](https://rwalgorithms.github.io/SingleLinkagePartitions.jl/) for an overview and examples.
