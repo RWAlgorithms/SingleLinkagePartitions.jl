@@ -26,7 +26,7 @@ makedocs(
     ],
 )
 deploydocs(
-    repo = "github.com/RWAlgorithms/SingleLinkagePartitions.jl.git",
+    repo = "github.com/RWAlgorithms/SingleLinkagePartitions.jl",
     target = "build",
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#"],
