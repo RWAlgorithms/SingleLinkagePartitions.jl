@@ -135,8 +135,8 @@ Xc3, vs_X3, Yc3, vs_Y3, partition_r3 = SL.reduce_pts(
 # average ponts that are very close together. `SL.UseSLDistance(a_tol)` is used to select a partition before averageing the points in each part.
 X_avg, y_avg = SL.avg_duplicates(X, y, atol)
 
-# Similar to avg_duplicates, but does not use the mean as the representative merged point. Instead, use the point with the corresponding lowest score in y as the merged representative.
+# Similar to avg_duplicates, but does not use the mean as the representative merged point. Instead, use the point with the corresponding largest score in y as the merged representative.
 scores = randn(rng, T, length(X))
-X_replaced, y_replaced = SL.replace_duplicates(copy_trait, SL.UseMaximum(), X, scores, atol)
+X_replaced, score_replaced = SL.replace_duplicates(copy_trait, SL.UseMaximum(), X, scores, atol)
 
 nothing
